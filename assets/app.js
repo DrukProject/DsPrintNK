@@ -130,7 +130,7 @@ if (calculator) {
   const cutModes = {
     trim: { label: "Порізка в формат", adjust: 0 },
     pieceTrim: { label: "Порізка поштучно", adjust: 60 },
-    digitalContour: { label: "Висікання цифрове", adjust: 185 }
+    digitalContour: { label: "Фігурна порізка (по контуру)", adjust: 185 }
   };
 
   const finishModes = {
