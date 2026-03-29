@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Калькулятор самоклейки | DsPrint Наклейки</title>
+  <meta name="description" content="Компактний калькулятор самоклейки для внутрішнього прорахунку: матеріали, друк, порізка, висікання, ламінація, фольга та інші опції для наклейок.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/styles.css?v=20260329a">
+</head>
+<body id="top">
+  <header class="site-header" data-header>
+    <div class="container header-wrap">
+      <a class="logo" href="index.html"><span>Ds</span><span class="print">Print</span><small>Наклейки</small></a>
+      <button class="nav-toggle" type="button" data-nav-toggle aria-label="Меню"><span></span><span></span><span></span></button>
+      <nav class="nav-links"><a class="btn btn-primary" href="materials.html">Каталог</a><a class="nav-link" href="materials.html">Каталог</a><a class="nav-link" href="tel:+380678003050">+380 67 800 30 50</a></nav>
+      <nav class="nav-menu" data-nav-menu><a class="btn btn-primary" href="materials.html">Каталог</a><a href="materials.html">Каталог</a><a href="tel:+380678003050">+380 67 800 30 50</a></nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero calc-hero tight">
+      <div class="container hero-wrap calc-hero-wrap">
+        <div class="hero-chip">Калькулятор для самоклейки</div>
+        <h1 class="hero-title">Всі опції для <span class="accent">наклейок</span></h1>
+        <p class="hero-sub">Швидкий прорахунок самоклеючих матеріалів, друку, порізки, висікання та оздоблення.</p>
+      </div>
+    </section>
+
+    <section class="section calc-section tight">
+      <div class="container" data-calculator>
+        <form class="form-card calc-form compact" onsubmit="return false;">
+          <div class="calc-head">
+            <div class="tag">Параметри</div>
+          </div>
+
+          <div class="calc-toolbar">
+            <div class="toolbar-box">
+              <label for="customWidth">розміри</label>
+              <div class="toolbar-inline">
+                <input id="customWidth" type="number" min="20" max="320" value="210">
+                <span>x</span>
+                <input id="customHeight" type="number" min="20" max="450" value="297">
+                <strong>мм</strong>
+              </div>
+              <div class="preset-row">
+                <button type="button" class="preset-btn" data-size="50x50">50×50</button>
+                <button type="button" class="preset-btn" data-size="70x100">70×100</button>
+                <button type="button" class="preset-btn" data-size="90x50">90×50</button>
+                <button type="button" class="preset-btn" data-size="100x100">100×100</button>
+                <button type="button" class="preset-btn" data-size="100x150">100×150</button>
+              </div>
+            </div>
+            <div class="toolbar-box">
+              <label for="quantity">тираж</label>
+              <div class="toolbar-inline">
+                <button type="button" class="step-btn" data-step-target="quantity" data-step="-1">−</button>
+                <input id="quantity" type="number" min="1" max="50000" step="1" value="100">
+                <button type="button" class="step-btn" data-step-target="quantity" data-step="1">+</button>
+                <strong>шт</strong>
+              </div>
+            </div>
+            <div class="toolbar-box">
+              <label for="kindCount">різних видів</label>
+              <div class="toolbar-inline">
+                <button type="button" class="step-btn" data-step-target="kindCount" data-step="-1">−</button>
+                <input id="kindCount" type="number" min="1" max="100" step="1" value="1">
+                <button type="button" class="step-btn" data-step-target="kindCount" data-step="1">+</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="option-block centered">
+            <label>на матеріалі</label>
+            <div class="option-grid centered compact material-categories" data-option-group="materialCategory">
+              <button type="button" class="option-pill category-pill" data-value="paper">самоклеючий папір</button>
+              <button type="button" class="option-pill category-pill" data-value="whiteFilm">біла плівка</button>
+              <button type="button" class="option-pill category-pill" data-value="clearFilm">прозора плівка</button>
+              <button type="button" class="option-pill category-pill" data-value="designer">дизайнерські самоклеючі папери і плівки</button>
+            </div>
+            <div class="option-subpanel material-subpanel" data-material-panel hidden>
+              <div class="option-grid centered" data-option-group="material">
+                <button type="button" class="option-pill" data-value="upmMatte" data-material-category="whiteFilm">самоклеюча плівка UPM біла без просічки матова</button>
+                <button type="button" class="option-pill" data-value="ritramaWhite" data-material-category="whiteFilm">самоклеюча плівка Ritrama БІЛА глянець</button>
+                <button type="button" class="option-pill" data-value="waterproof" data-material-category="whiteFilm">самоклеючий Waterproof White вологостійкий</button>
+                <button type="button" class="option-pill" data-value="ritramaClear" data-material-category="clearFilm">самоклеюча плівка Ritrama ПРОЗОРА глянець</button>
+                <button type="button" class="option-pill" data-value="paperSlits" data-material-category="paper">самоклеючий папір з надсічками UPM Raflatac</button>
+                <button type="button" class="option-pill" data-value="woodstock" data-material-category="designer">самоклеючий Woodstock Betulla кремовий</button>
+                <button type="button" class="option-pill" data-value="kraft" data-material-category="designer">самоклеючий UPM бурий крафт смугастий</button>
+                <button type="button" class="option-pill" data-value="tintoretto" data-material-category="designer">самоклеючий Tintoretto Angora світло сірий</button>
+                <button type="button" class="option-pill" data-value="sirio" data-material-category="designer">самоклеючий Sirio Pearl Ice White</button>
+                <button type="button" class="option-pill" data-value="silver" data-material-category="designer">самоклеючий Lam Foil Matt Silver</button>
+                <button type="button" class="option-pill" data-value="embossed" data-material-category="designer">самоклеючий Embossed Coated Skin</button>
+                <button type="button" class="option-pill" data-value="snow" data-material-category="designer">самоклеючий Constellation Snow Vergata</button>
+                <button type="button" class="option-pill" data-value="jade" data-material-category="designer">самоклеючий Constellation Jade Raster</button>
+                <button type="button" class="option-pill" data-value="antiquaWhite" data-material-category="designer">самоклеючий Antiqua White</button>
+                <button type="button" class="option-pill" data-value="antiquaIvory" data-material-category="designer">самоклеючий Antiqua Ivory</button>
+                <button type="button" class="option-pill" data-value="acquerello" data-material-category="designer">самоклеючий Acquerello Avorio</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="option-block centered">
+            <label>друк</label>
+            <div class="option-grid centered compact" data-option-group="print">
+              <button type="button" class="option-pill" data-value="blank">без друку</button>
+              <button type="button" class="option-pill active" data-value="color1">повноколірний односторонній</button>
+              <button type="button" class="option-pill" data-value="bw1">чорно-білий односторонній</button>
+            </div>
+          </div>
+
+          <div class="option-block centered">
+            <label>додаткові опції для наклейок</label>
+            <div class="option-grid centered compact" data-option-group="cut">
+              <button type="button" class="option-pill active" data-value="trim">порізка</button>
+              <button type="button" class="option-pill" data-value="pieceTrim">порізка поштучно</button>
+              <button type="button" class="option-pill" data-value="digitalContour">висікання цифрове</button>
+            </div>
+          </div>
+
+          <div class="option-toggle-row">
+            <button type="button" class="option-toggle-btn" data-finish-toggle>оздоблення</button>
+          </div>
+
+          <div class="option-block centered is-collapsed" data-finish-panel hidden>
+            <div class="option-grid centered compact" data-option-group="finish">
+              <button type="button" class="option-pill active" data-value="none">без оздоблення</button>
+              <button type="button" class="option-pill" data-value="perforation">перфорація</button>
+              <button type="button" class="option-pill" data-value="plotterContour">фігурна надсічка плоттером</button>
+            </div>
+          </div>
+
+          <div class="result-card calc-result bottom" data-result-card>
+            <div class="tag">Ціна</div>
+            <h3>Підсумок прорахунку</h3>
+            <strong data-total>Оберіть матеріал для друку</strong>
+            <div class="price-inline">
+              <div><span>ціна за 1 шт</span><b data-unit>—</b></div>
+              <div><span>розмір</span><b data-area>0 мм</b></div>
+              <div><span>матеріал</span><b data-material-label>не вибрано</b></div>
+            </div>
+            <div class="calc-summary" data-summary></div>
+          </div>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <a class="back-top" href="#top">↑</a>
+    <div class="container footer-main">
+      <div class="footer-grid">
+        <div><a class="logo" href="index.html"><span style="color:#fff">Ds</span><span class="print">Print</span><small>Наклейки</small></a><p>Калькулятор зібраний під самоклеючі матеріали та опції, які реально застосовуються для наклейок.</p></div>
+        <div><h4>Сторінки</h4><ul><li><a href="index.html">Головна</a></li><li><a href="materials.html">Матеріали</a></li><li><a href="materials.html">Каталог</a></li></ul></div>
+        <div><h4>Контакти</h4><ul><li><a href="tel:+380678003050">+380 67 800 30 50</a></li><li><a href="mailto:dsprint.ua@gmail.com">dsprint.ua@gmail.com</a></li><li>@dsprints</li></ul></div>
+        <div><h4>Адреса</h4><ul><li>Львів, вул. Джерельна 38</li><li>Пн-Пт 09:00-18:00</li><li>Нова Пошта по Україні</li></ul></div>
+        <div><h4>Важливо</h4><ul><li>Самоклейка</li><li>Ламінація</li><li>Висікання</li></ul></div>
+      </div>
+      <div class="footer-bottom">© 2026 DsPrint Наклейки. Усі права захищено.</div>
+    </div>
+  </footer>
+  <script src="assets/pricing-data.js?v=20260329a"></script>
+  <script src="assets/app.js?v=20260329a"></script>
+</body>
+</html>
