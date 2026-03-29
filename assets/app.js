@@ -97,7 +97,6 @@ if (calculator) {
   const kindCountNode = calculator.querySelector("#kindCount");
   const presetButtons = calculator.querySelectorAll("[data-size]");
   const stepButtons = calculator.querySelectorAll("[data-step-target]");
-  const finishToggle = calculator.querySelector("[data-finish-toggle]");
   const finishPanel = calculator.querySelector("[data-finish-panel]");
   const materialPanel = calculator.querySelector("[data-material-panel]");
   const materialButtons = calculator.querySelectorAll('[data-option-group="material"] .option-pill');
@@ -147,7 +146,6 @@ if (calculator) {
   const finishPricing = pricingData.finishModes || {};
 
   const selected = { materialCategory: "paper", material: "paperSlits", print: "color1", cut: "pieceTrim", finish: "none" };
-  let finishEnabled = false;
   const fallbackValues = { print: "blank", finish: "none" };
 
   const syncMaterialCategory = () => {
@@ -216,22 +214,6 @@ if (calculator) {
     });
   });
 
-  if (finishToggle && finishPanel) {
-    finishPanel.hidden = true;
-    finishToggle.classList.remove("open");
-    finishToggle.addEventListener("click", () => {
-      finishEnabled = !finishEnabled;
-      finishPanel.hidden = !finishEnabled;
-      finishToggle.classList.toggle("open", finishEnabled);
-      if (!finishEnabled) {
-        selected.finish = "none";
-        finishPanel.querySelectorAll(".option-pill").forEach((item) => item.classList.remove("active"));
-        const noneButton = finishPanel.querySelector('[data-value="none"]');
-        if (noneButton) noneButton.classList.add("active");
-      }
-      calculate();
-    });
-  }
   syncMaterialCategory();
 
   presetButtons.forEach((button) => {
@@ -321,7 +303,7 @@ if (calculator) {
     const material = selected.material ? materials[selected.material] : null;
     const print = printModes[selected.print];
     const cut = cutModes[selected.cut] || cutModes.trim;
-    const finish = finishEnabled ? finishModes[selected.finish] : finishModes.none;
+    const finish = finishModes[selected.finish] || finishModes.none;
 
     areaNode.textContent = width && height ? `${width}×${height} мм` : "—";
 
@@ -375,7 +357,7 @@ if (calculator) {
     const sheetCost = pricingMaterial.sheetCost || 0;
     const printConfig = printPricing[selected.print] || {};
     const cutConfig = cutPricing[selected.cut] || cutPricing.trim || {};
-    const finishConfig = finishEnabled ? (finishPricing[selected.finish] || {}) : {};
+    const finishConfig = finishPricing[selected.finish] || {};
     const printCharge = getVolumeCharge(printConfig, totalSheets);
     const cutCharge = getVolumeCharge(cutConfig, totalSheets);
     const finishCharge = getVolumeCharge(finishConfig, totalSheets);
