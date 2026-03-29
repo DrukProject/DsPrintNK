@@ -61,20 +61,47 @@ window.PRINT_CALC_DATA = {
   },
   finishModes: {
     none: { setupFee: 0, maxPerSheet: 0, minPerSheet: 0, minSheets: 1, maxSheets: 500, minCharge: 0 },
-    perforation: {
-      minCharge: 15,
+    glossLam: {
+      minCharge: 35,
       curve: [
-        { sheets: 1, total: 15 },
-        { sheets: 5, total: 19 },
-        { sheets: 10, total: 24 },
-        { sheets: 25, total: 40 },
-        { sheets: 50, total: 67 },
-        { sheets: 100, total: 119 },
-        { sheets: 200, total: 225 },
-        { sheets: 500, total: 544 },
-        { sheets: 1000, total: 1075 }
+        { sheets: 1, total: 35 },
+        { sheets: 5, total: 42 },
+        { sheets: 10, total: 52 },
+        { sheets: 25, total: 82 },
+        { sheets: 50, total: 128 },
+        { sheets: 100, total: 214 },
+        { sheets: 200, total: 398 },
+        { sheets: 500, total: 945 },
+        { sheets: 1000, total: 1860 }
       ]
     },
-    plotterContour: { setupFee: 90, maxPerSheet: 40, minPerSheet: 10, minSheets: 1, maxSheets: 500, minCharge: 130 }
+    matteLam: {
+      minCharge: 40,
+      curve: [
+        { sheets: 1, total: 40 },
+        { sheets: 5, total: 48 },
+        { sheets: 10, total: 59 },
+        { sheets: 25, total: 92 },
+        { sheets: 50, total: 142 },
+        { sheets: 100, total: 236 },
+        { sheets: 200, total: 438 },
+        { sheets: 500, total: 1035 },
+        { sheets: 1000, total: 2035 }
+      ]
+    },
+    softTouch: {
+      minCharge: 48,
+      curve: [
+        { sheets: 1, total: 48 },
+        { sheets: 5, total: 58 },
+        { sheets: 10, total: 72 },
+        { sheets: 25, total: 112 },
+        { sheets: 50, total: 172 },
+        { sheets: 100, total: 286 },
+        { sheets: 200, total: 528 },
+        { sheets: 500, total: 1245 },
+        { sheets: 1000, total: 2445 }
+      ]
+    }
   }
 };

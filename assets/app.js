@@ -143,9 +143,10 @@ if (calculator) {
   };
 
   const finishModes = {
-    none: { label: "Без оздоблення", adjust: 0 },
-    perforation: { label: "Перфорація", adjust: 120 },
-    plotterContour: { label: "Фігурна надсічка плоттером", adjust: 213 }
+    none: { label: "Без покриття", adjust: 0 },
+    glossLam: { label: "Одностороння глянцева ламінація", adjust: 110 },
+    matteLam: { label: "Одностороння матова ламінація", adjust: 130 },
+    softTouch: { label: "Одностороння soft touch", adjust: 160 }
   };
 
   const sheetProfiles = pricingData.sheetProfiles || {};
@@ -342,9 +343,9 @@ if (calculator) {
         "Матеріал: не вибрано",
         `Друк: ${print.label}`,
         `Порізка: ${cut.label}`,
-        `Оздоблення: ${finish.label}`,
-        `Тираж: ${quantity.toLocaleString("uk-UA")} шт`,
-        `Різних видів: ${kindCount}`
+          `Покриття: ${finish.label}`,
+          `Тираж: ${quantity.toLocaleString("uk-UA")} шт`,
+          `Різних видів: ${kindCount}`
       ].map((line) => `<div>${line}</div>`).join("");
       return;
     }
@@ -357,7 +358,7 @@ if (calculator) {
         `Матеріал: ${material.label}`,
         `Друк: ${print.label}`,
         `Порізка: ${cut.label}`,
-        `Оздоблення: ${finish.label}`,
+        `Покриття: ${finish.label}`,
         `Тираж: ${quantity ? `${quantity.toLocaleString("uk-UA")} шт` : "не вказано"}`,
         `Різних видів: ${kindCount || "не вказано"}`,
         `Розмір: ${width && height ? `${width}×${height} мм` : "не вказано"}`
@@ -406,10 +407,10 @@ if (calculator) {
       `Матеріал разом: ${roundMoney(materialCharge)}`,
       `Друк разом: ${roundMoney(printCharge)}`,
       `Порізка разом: ${roundMoney(cutCharge)}`,
-      `Оздоблення разом: ${roundMoney(finishCharge)}`,
+      `Покриття разом: ${roundMoney(finishCharge)}`,
       `Друк: ${print.label}`,
       `Порізка: ${cut.label}`,
-      `Оздоблення: ${finish.label}`,
+      `Покриття: ${finish.label}`,
       `Тираж: ${quantity.toLocaleString("uk-UA")} шт`,
       `Різних видів: ${kindCount}`
     ].map((line) => `<div>${line}</div>`).join("");
