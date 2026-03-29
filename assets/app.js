@@ -155,7 +155,7 @@ if (calculator) {
   const cutPricing = pricingData.cutModes || {};
   const finishPricing = pricingData.finishModes || {};
 
-  const selected = { materialCategory: "paper", material: "paperSlits", print: "color1", cut: "trim", finish: "none" };
+  const selected = { materialCategory: "paper", material: "paperSlits", print: "color1", cut: "pieceTrim", finish: "none" };
   let finishEnabled = false;
   const fallbackValues = { print: "blank", finish: "none" };
 
