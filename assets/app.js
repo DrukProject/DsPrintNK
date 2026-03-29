@@ -93,6 +93,7 @@ if (calculator) {
   const summaryNode = calculator.querySelector("[data-summary]");
   const selectionSummaryNode = calculator.querySelector("[data-selection-summary]");
   const breakdownNode = calculator.querySelector("[data-breakdown]");
+  const orderTelegramLink = calculator.querySelector("[data-order-telegram]");
   const widthNode = calculator.querySelector("#customWidth");
   const heightNode = calculator.querySelector("#customHeight");
   const quantityNode = calculator.querySelector("#quantity");
@@ -267,6 +268,10 @@ if (calculator) {
       </div>
     `).join("");
   };
+  const setOrderTelegramLink = (message) => {
+    if (!orderTelegramLink) return;
+    orderTelegramLink.href = `https://t.me/dsprints?text=${encodeURIComponent(message)}`;
+  };
   const getInputValue = (node) => {
     if (node.value === "") return null;
     const raw = Number(node.value);
@@ -347,6 +352,15 @@ if (calculator) {
     areaNode.textContent = width && height ? `${width}×${height} мм` : "—";
 
     if (!material) {
+      setOrderTelegramLink([
+        "Добрий день! Хочу замовити наклейки.",
+        `Друк: ${print.label}`,
+        `Порізка: ${cut.label}`,
+        `Покриття: ${finish.label}`,
+        quantity ? `Тираж: ${quantity.toLocaleString("uk-UA")} шт` : null,
+        kindCount ? `Різних видів: ${kindCount}` : null,
+        width && height ? `Розмір: ${width}×${height} мм` : null
+      ].filter(Boolean).join("\n"));
       totalNode.textContent = "Оберіть матеріал для друку";
       unitNode.textContent = "—";
       materialLabel.textContent = "не вибрано";
@@ -363,6 +377,16 @@ if (calculator) {
     }
 
     if (!width || !height || !quantity || !kindCount) {
+      setOrderTelegramLink([
+        "Добрий день! Хочу замовити наклейки.",
+        `Матеріал: ${material.label}`,
+        `Друк: ${print.label}`,
+        `Порізка: ${cut.label}`,
+        `Покриття: ${finish.label}`,
+        quantity ? `Тираж: ${quantity.toLocaleString("uk-UA")} шт` : "Тираж: уточню",
+        kindCount ? `Різних видів: ${kindCount}` : "Різних видів: уточню",
+        width && height ? `Розмір: ${width}×${height} мм` : "Розмір: уточню"
+      ].join("\n"));
       totalNode.textContent = "Заповніть розміри, тираж і види";
       unitNode.textContent = "—";
       materialLabel.textContent = material.label;
@@ -382,6 +406,16 @@ if (calculator) {
     const pricingMaterial = materialPricing[selected.material] || {};
     const profile = sheetProfiles[pricingMaterial.profile] || null;
     if (!profile) {
+      setOrderTelegramLink([
+        "Добрий день! Хочу замовити наклейки.",
+        `Матеріал: ${material.label}`,
+        `Друк: ${print.label}`,
+        `Порізка: ${cut.label}`,
+        `Покриття: ${finish.label}`,
+        `Тираж: ${quantity.toLocaleString("uk-UA")} шт`,
+        `Різних видів: ${kindCount}`,
+        `Розмір: ${width}×${height} мм`
+      ].join("\n"));
       totalNode.textContent = "Немає даних по матеріалу";
       unitNode.textContent = "—";
       materialLabel.textContent = material.label;
@@ -409,6 +443,17 @@ if (calculator) {
     totalNode.textContent = roundMoney(total);
     unitNode.textContent = formatUnit(total / quantity);
     materialLabel.textContent = material.label;
+    setOrderTelegramLink([
+      "Добрий день! Хочу замовити цей варіант наклейок.",
+      `Матеріал: ${material.label}`,
+      `Розмір: ${width}×${height} мм`,
+      `Тираж: ${quantity.toLocaleString("uk-UA")} шт`,
+      `Різних видів: ${kindCount}`,
+      `Друк: ${print.label}`,
+      `Порізка: ${cut.label}`,
+      `Покриття: ${finish.label}`,
+      `Орієнтовна ціна: ${roundMoney(total)}`
+    ].join("\n"));
     setBreakdown([
       { label: "Матеріал", value: roundMoney(materialCharge) },
       { label: "Друк", value: roundMoney(printCharge) },
