@@ -1,14 +1,84 @@
 const header = document.querySelector("[data-header]");
 const navToggle = document.querySelector("[data-nav-toggle]");
 const navMenu = document.querySelector("[data-nav-menu]");
+
+const ensureContactFab = () => {
+  let contactFab = document.querySelector(".contact-fab");
+  if (contactFab) return contactFab;
+
+  const footer = document.querySelector(".footer");
+  if (!footer) return null;
+
+  contactFab = document.createElement("div");
+  contactFab.className = "contact-fab";
+  contactFab.innerHTML = `
+    <form class="callback-form" data-callback-form>
+      <div class="field"><label for="cb-name">Ваше ім'я</label><input id="cb-name" type="text" placeholder="Як до вас звертатись"></div>
+      <div class="field"><label for="cb-phone">Телефон</label><input id="cb-phone" type="tel" placeholder="+380"></div>
+      <a class="btn btn-primary" href="tel:+380678003050">Замовити дзвінок</a>
+    </form>
+    <div class="fab-panel" data-fab-panel>
+      <button class="fab-pill" type="button" data-callback-toggle>
+        <span class="icon cb" aria-hidden="true">
+          <svg viewBox="0 0 24 24" role="img" focusable="false">
+            <path d="M6.62 10.79a15.05 15.05 0 0 0 6.59 6.59l2.2-2.2a1 1 0 0 1 1.01-.24c1.11.37 2.3.57 3.53.57a1 1 0 0 1 1 1V20a1 1 0 0 1-1 1C10.3 21 3 13.7 3 4a1 1 0 0 1 1-1h3.49a1 1 0 0 1 1 1c0 1.23.2 2.42.57 3.53a1 1 0 0 1-.24 1.01z" fill="currentColor"/>
+          </svg>
+        </span>
+        Зворотній дзвінок
+      </button>
+      <a class="fab-pill" href="https://t.me/dsprints">
+        <span class="icon tg" aria-hidden="true"><img src="https://cdn.simpleicons.org/telegram/FFFFFF" alt=""></span>
+        Telegram
+      </a>
+      <a class="fab-pill" href="viber://chat?number=%2B380678003050">
+        <span class="icon vb" aria-hidden="true"><img src="https://cdn.simpleicons.org/viber/FFFFFF" alt=""></span>
+        Viber
+      </a>
+    </div>
+    <button class="fab-trigger" type="button" data-fab-toggle aria-label="Повідомлення">
+      <svg viewBox="0 0 24 24" role="img" focusable="false" aria-hidden="true">
+        <path d="M4 5.5A2.5 2.5 0 0 1 6.5 3h11A2.5 2.5 0 0 1 20 5.5v8A2.5 2.5 0 0 1 17.5 16H9l-4.2 3.5A.5.5 0 0 1 4 19.1V16.5A2.5 2.5 0 0 1 1.5 14v-8A2.5 2.5 0 0 1 4 5.5Z" fill="currentColor"/>
+      </svg>
+    </button>
+  `;
+  footer.before(contactFab);
+  return contactFab;
+};
+
+const cleanupDuplicateNavLinks = () => {
+  document.querySelectorAll(".nav-links, .nav-menu").forEach((nav) => {
+    const materialLinks = [...nav.querySelectorAll('a[href="materials.html"]')];
+    if (materialLinks.length < 2) return;
+    materialLinks.slice(1).forEach((link) => link.remove());
+  });
+};
+
+cleanupDuplicateNavLinks();
+ensureContactFab();
+
 const fabToggle = document.querySelector("[data-fab-toggle]");
 const fabPanel = document.querySelector("[data-fab-panel]");
 const callbackToggle = document.querySelector("[data-callback-toggle]");
 const callbackForm = document.querySelector("[data-callback-form]");
 
 if (navToggle && navMenu) {
-  navToggle.addEventListener("click", () => navMenu.classList.toggle("open"));
-  navMenu.querySelectorAll("a").forEach((link) => link.addEventListener("click", () => navMenu.classList.remove("open")));
+  const setNavOpen = (isOpen) => {
+    navMenu.classList.toggle("open", isOpen);
+    navToggle.classList.toggle("is-open", isOpen);
+    navToggle.setAttribute("aria-expanded", String(isOpen));
+  };
+
+  navToggle.setAttribute("aria-expanded", "false");
+  navToggle.addEventListener("click", () => setNavOpen(!navMenu.classList.contains("open")));
+  navMenu.querySelectorAll("a").forEach((link) => link.addEventListener("click", () => setNavOpen(false)));
+  document.addEventListener("click", (event) => {
+    if (!navMenu.classList.contains("open")) return;
+    if (navMenu.contains(event.target) || navToggle.contains(event.target)) return;
+    setNavOpen(false);
+  });
+  window.addEventListener("resize", () => {
+    if (window.innerWidth >= 1024) setNavOpen(false);
+  });
 }
 if (fabToggle && fabPanel) fabToggle.addEventListener("click", () => fabPanel.classList.toggle("open"));
 if (callbackToggle && callbackForm) callbackToggle.addEventListener("click", () => callbackForm.classList.toggle("open"));
@@ -31,6 +101,15 @@ if (calculator) {
   const finishPanel = calculator.querySelector("[data-finish-panel]");
   const materialPanel = calculator.querySelector("[data-material-panel]");
   const materialButtons = calculator.querySelectorAll('[data-option-group="material"] .option-pill');
+  const materialHint = calculator.querySelector("[data-material-hint]") || (() => {
+    const hint = document.createElement("div");
+    hint.className = "material-hint";
+    hint.dataset.materialHint = "";
+    hint.hidden = true;
+    hint.textContent = "Після вибору нижче з'явиться список конкретних матеріалів.";
+    calculator.querySelector(".material-categories")?.after(hint);
+    return hint;
+  })();
 
   const materials = {
     upmMatte: { label: "UPM біла матова без просічки", factor: 1, category: "whiteFilm" },
@@ -81,6 +160,7 @@ if (calculator) {
 
   const syncMaterialCategory = () => {
     if (materialPanel) materialPanel.hidden = !selected.materialCategory;
+    if (materialHint) materialHint.hidden = !selected.materialCategory;
     materialButtons.forEach((button) => {
       const visible = !!selected.materialCategory && button.dataset.materialCategory === selected.materialCategory;
       button.hidden = !visible;
@@ -107,6 +187,11 @@ if (calculator) {
         selected.materialCategory = button.dataset.value;
         selected.material = "";
         syncMaterialCategory();
+        if (materialPanel) {
+          requestAnimationFrame(() => {
+            materialPanel.scrollIntoView({ behavior: "smooth", block: "nearest" });
+          });
+        }
         calculate();
         return;
       }
@@ -354,6 +439,17 @@ if (filters.length && galleryItems.length) {
 const materialFilterButtons = document.querySelectorAll("[data-material-filter]");
 const materialCards = document.querySelectorAll("[data-material-card]");
 if (materialFilterButtons.length && materialCards.length) {
+  const filterRow = document.querySelector("[data-material-filters]");
+  const materialListHint = (() => {
+    if (!filterRow) return null;
+    const hint = document.createElement("div");
+    hint.className = "material-hint";
+    hint.hidden = true;
+    hint.textContent = "Нижче відкрився список матеріалів.";
+    filterRow.after(hint);
+    return hint;
+  })();
+
   const applyMaterialFilter = (filter) => {
     materialFilterButtons.forEach((button) => {
       button.classList.toggle("active", button.dataset.materialFilter === filter);
@@ -362,6 +458,8 @@ if (materialFilterButtons.length && materialCards.length) {
     materialCards.forEach((card) => {
       card.hidden = card.dataset.materialCard !== filter;
     });
+
+    if (materialListHint) materialListHint.hidden = false;
   };
 
   const defaultMaterialFilter =
@@ -375,6 +473,12 @@ if (materialFilterButtons.length && materialCards.length) {
   materialFilterButtons.forEach((button) => {
     button.addEventListener("click", () => {
       applyMaterialFilter(button.dataset.materialFilter);
+      const firstVisibleCard = [...materialCards].find((card) => !card.hidden);
+      if (firstVisibleCard) {
+        requestAnimationFrame(() => {
+          firstVisibleCard.scrollIntoView({ behavior: "smooth", block: "nearest" });
+        });
+      }
     });
   });
 }
@@ -439,7 +543,8 @@ const initRevealAnimations = () => {
     document.querySelectorAll(selector).forEach((node, index) => {
       if (node.dataset.revealReady === "true") return;
       classes.split(" ").forEach((className) => node.classList.add(className));
-      node.style.setProperty("--reveal-delay", `${Math.min(index * 70, 420)}ms`);
+        const isMobile = window.matchMedia("(max-width: 767px)").matches;
+        node.style.setProperty("--reveal-delay", `${Math.min(index * (isMobile ? 8 : 70), isMobile ? 32 : 420)}ms`);
       node.dataset.revealReady = "true";
       nodes.push(node);
     });
@@ -459,7 +564,10 @@ const initRevealAnimations = () => {
         obs.unobserve(entry.target);
       });
     },
-    { threshold: 0.14, rootMargin: "0px 0px -8% 0px" }
+      {
+        threshold: window.matchMedia("(max-width: 767px)").matches ? 0.01 : 0.14,
+        rootMargin: window.matchMedia("(max-width: 767px)").matches ? "0px 0px -12% 0px" : "0px 0px -8% 0px"
+      }
   );
 
   nodes.forEach((node) => observer.observe(node));

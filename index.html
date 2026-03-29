@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="uk">
 <head>
   <meta charset="UTF-8">
@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/styles.css">
+  <link rel="stylesheet" href="assets/styles.css?v=20260329b">
 </head>
 <body id="top">
   <header class="site-header" data-header>
@@ -17,13 +17,13 @@
       <button class="nav-toggle" type="button" data-nav-toggle aria-label="Меню"><span></span><span></span><span></span></button>
       <nav class="nav-links">
         <a class="btn btn-primary" href="materials.html">Каталог</a>
+        <a class="nav-link" href="calculator.html">Калькулятор</a>
         <a class="nav-link" href="#contacts">Контакти</a>
         <a class="nav-link" href="tel:+380678003050">+380 67 800 30 50</a>
       </nav>
       <nav class="nav-menu" data-nav-menu>
         <a class="btn btn-primary" href="materials.html">Каталог</a>
         <a href="calculator.html">Калькулятор</a>
-        <a href="materials.html">Каталог</a>
         <a href="#contacts">Контакти</a>
         <a href="tel:+380678003050">+380 67 800 30 50</a>
       </nav>
@@ -152,7 +152,11 @@
         Viber
       </a>
     </div>
-    <button class="btn btn-primary" type="button" data-fab-toggle>Повідомлення</button>
+    <button class="fab-trigger" type="button" data-fab-toggle aria-label="Повідомлення">
+      <svg viewBox="0 0 24 24" role="img" focusable="false" aria-hidden="true">
+        <path d="M4 5.5A2.5 2.5 0 0 1 6.5 3h11A2.5 2.5 0 0 1 20 5.5v8A2.5 2.5 0 0 1 17.5 16H9l-4.2 3.5A.5.5 0 0 1 4 19.1V16.5A2.5 2.5 0 0 1 1.5 14v-8A2.5 2.5 0 0 1 4 5.5Z" fill="currentColor"/>
+      </svg>
+    </button>
   </div>
   <footer class="footer" id="contacts">
     <a class="back-top" href="#top">↑</a>
@@ -178,7 +182,7 @@
       <div class="footer-bottom">© 2026 DsPrint Наклейки. Усі права захищено.</div>
     </div>
   </footer>
-  <script src="assets/app.js"></script>
+  <script src="assets/app.js?v=20260329b"></script>
 </body>
 </html>
 
