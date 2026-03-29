@@ -154,13 +154,16 @@ if (calculator) {
   const cutPricing = pricingData.cutModes || {};
   const finishPricing = pricingData.finishModes || {};
 
-  const selected = { materialCategory: "", material: "", print: "color1", cut: "trim", finish: "none" };
+  const selected = { materialCategory: "paper", material: "paperSlits", print: "color1", cut: "trim", finish: "none" };
   let finishEnabled = false;
   const fallbackValues = { print: "blank", finish: "none" };
 
   const syncMaterialCategory = () => {
     if (materialPanel) materialPanel.hidden = !selected.materialCategory;
     if (materialHint) materialHint.hidden = !selected.materialCategory;
+    calculator.querySelectorAll('[data-option-group="materialCategory"] .option-pill').forEach((button) => {
+      button.classList.toggle("active", button.dataset.value === selected.materialCategory);
+    });
     materialButtons.forEach((button) => {
       const visible = !!selected.materialCategory && button.dataset.materialCategory === selected.materialCategory;
       button.hidden = !visible;
