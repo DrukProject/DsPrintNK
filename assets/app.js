@@ -93,7 +93,7 @@ if (calculator) {
   const summaryNode = calculator.querySelector("[data-summary]");
   const selectionSummaryNode = calculator.querySelector("[data-selection-summary]");
   const breakdownNode = calculator.querySelector("[data-breakdown]");
-  const orderTelegramLink = calculator.querySelector("[data-order-telegram]");
+  const orderLink = calculator.querySelector("[data-order-link]");
   const widthNode = calculator.querySelector("#customWidth");
   const heightNode = calculator.querySelector("#customHeight");
   const quantityNode = calculator.querySelector("#quantity");
@@ -268,9 +268,10 @@ if (calculator) {
       </div>
     `).join("");
   };
-  const setOrderTelegramLink = (message) => {
-    if (!orderTelegramLink) return;
-    orderTelegramLink.href = `https://t.me/dsprints?text=${encodeURIComponent(message)}`;
+  const saveOrderDraft = (draft) => {
+    try {
+      window.sessionStorage.setItem("dsprintOrderDraft", JSON.stringify(draft));
+    } catch {}
   };
   const getInputValue = (node) => {
     if (node.value === "") return null;
@@ -351,16 +352,28 @@ if (calculator) {
 
     areaNode.textContent = width && height ? `${width}×${height} мм` : "—";
 
+    const baseDraft = {
+      material: material ? material.label : "",
+      materialKey: selected.material,
+      materialCategory: selected.materialCategory,
+      size: width && height ? `${width}×${height} мм` : "",
+      width: width || "",
+      height: height || "",
+      quantity: quantity || "",
+      kindCount: kindCount || "",
+      print: print.label,
+      printKey: selected.print,
+      cut: cut.label,
+      cutKey: selected.cut,
+      finish: finish.label,
+      finishKey: selected.finish,
+      total: "",
+      unit: "",
+      summaryParts
+    };
+
     if (!material) {
-      setOrderTelegramLink([
-        "Добрий день! Хочу замовити наклейки.",
-        `Друк: ${print.label}`,
-        `Порізка: ${cut.label}`,
-        `Покриття: ${finish.label}`,
-        quantity ? `Тираж: ${quantity.toLocaleString("uk-UA")} шт` : null,
-        kindCount ? `Різних видів: ${kindCount}` : null,
-        width && height ? `Розмір: ${width}×${height} мм` : null
-      ].filter(Boolean).join("\n"));
+      saveOrderDraft(baseDraft);
       totalNode.textContent = "Оберіть матеріал для друку";
       unitNode.textContent = "—";
       materialLabel.textContent = "не вибрано";
@@ -377,16 +390,7 @@ if (calculator) {
     }
 
     if (!width || !height || !quantity || !kindCount) {
-      setOrderTelegramLink([
-        "Добрий день! Хочу замовити наклейки.",
-        `Матеріал: ${material.label}`,
-        `Друк: ${print.label}`,
-        `Порізка: ${cut.label}`,
-        `Покриття: ${finish.label}`,
-        quantity ? `Тираж: ${quantity.toLocaleString("uk-UA")} шт` : "Тираж: уточню",
-        kindCount ? `Різних видів: ${kindCount}` : "Різних видів: уточню",
-        width && height ? `Розмір: ${width}×${height} мм` : "Розмір: уточню"
-      ].join("\n"));
+      saveOrderDraft({ ...baseDraft, material: material.label });
       totalNode.textContent = "Заповніть розміри, тираж і види";
       unitNode.textContent = "—";
       materialLabel.textContent = material.label;
@@ -406,16 +410,7 @@ if (calculator) {
     const pricingMaterial = materialPricing[selected.material] || {};
     const profile = sheetProfiles[pricingMaterial.profile] || null;
     if (!profile) {
-      setOrderTelegramLink([
-        "Добрий день! Хочу замовити наклейки.",
-        `Матеріал: ${material.label}`,
-        `Друк: ${print.label}`,
-        `Порізка: ${cut.label}`,
-        `Покриття: ${finish.label}`,
-        `Тираж: ${quantity.toLocaleString("uk-UA")} шт`,
-        `Різних видів: ${kindCount}`,
-        `Розмір: ${width}×${height} мм`
-      ].join("\n"));
+      saveOrderDraft({ ...baseDraft, material: material.label });
       totalNode.textContent = "Немає даних по матеріалу";
       unitNode.textContent = "—";
       materialLabel.textContent = material.label;
@@ -443,17 +438,15 @@ if (calculator) {
     totalNode.textContent = roundMoney(total);
     unitNode.textContent = formatUnit(total / quantity);
     materialLabel.textContent = material.label;
-    setOrderTelegramLink([
-      "Добрий день! Хочу замовити цей варіант наклейок.",
-      `Матеріал: ${material.label}`,
-      `Розмір: ${width}×${height} мм`,
-      `Тираж: ${quantity.toLocaleString("uk-UA")} шт`,
-      `Різних видів: ${kindCount}`,
-      `Друк: ${print.label}`,
-      `Порізка: ${cut.label}`,
-      `Покриття: ${finish.label}`,
-      `Орієнтовна ціна: ${roundMoney(total)}`
-    ].join("\n"));
+    saveOrderDraft({
+      ...baseDraft,
+      material: material.label,
+      total: roundMoney(total),
+      unit: formatUnit(total / quantity),
+      itemsPerSheet,
+      sheetsPerKind,
+      totalSheets
+    });
     setBreakdown([
       { label: "Матеріал", value: roundMoney(materialCharge) },
       { label: "Друк", value: roundMoney(printCharge) },
@@ -491,6 +484,111 @@ if (calculator) {
   });
 
   calculate();
+}
+
+const orderFormPage = document.querySelector("[data-order-form]");
+if (orderFormPage) {
+  let draft = {};
+  try {
+    draft = JSON.parse(window.sessionStorage.getItem("dsprintOrderDraft") || "{}");
+  } catch {
+    draft = {};
+  }
+
+  const phoneInput = orderFormPage.querySelector("#order-phone");
+  const firstNameInput = orderFormPage.querySelector("#order-first-name");
+  const lastNameInput = orderFormPage.querySelector("#order-last-name");
+  const emailInput = orderFormPage.querySelector("#order-email");
+  const commentInput = orderFormPage.querySelector("#order-comment");
+  const designerNoteInput = orderFormPage.querySelector("#designer-note");
+  const layoutLinkInput = orderFormPage.querySelector("#layout-link");
+  const layoutFileInput = orderFormPage.querySelector("#layout-file");
+  const deliveryCityInput = orderFormPage.querySelector("#delivery-city");
+  const deliveryAddressInput = orderFormPage.querySelector("#delivery-address");
+  const deliveryInputs = orderFormPage.querySelectorAll('input[name="delivery"]');
+  const layoutInputs = orderFormPage.querySelectorAll('input[name="layout-state"]');
+  const layoutLinkField = orderFormPage.querySelector("[data-layout-link-field]");
+  const layoutUploadField = orderFormPage.querySelector("[data-layout-upload-field]");
+  const designerField = orderFormPage.querySelector("[data-designer-field]");
+  const deliveryCityField = orderFormPage.querySelector("[data-delivery-city-field]");
+  const deliveryAddressField = orderFormPage.querySelector("[data-delivery-address-field]");
+  const summaryBox = orderFormPage.querySelector("[data-order-summary]");
+  const totalBox = orderFormPage.querySelector("[data-order-total]");
+  const submitButton = orderFormPage.querySelector("[data-order-submit]");
+
+  const updateLayoutState = () => {
+    const selectedLayout = orderFormPage.querySelector('input[name="layout-state"]:checked')?.value;
+    if (layoutLinkField) layoutLinkField.hidden = selectedLayout !== "link";
+    if (layoutUploadField) layoutUploadField.hidden = selectedLayout !== "upload";
+    if (designerField) designerField.hidden = selectedLayout !== "designer";
+  };
+
+  const updateDeliveryState = () => {
+    const selectedDelivery = orderFormPage.querySelector('input[name="delivery"]:checked')?.value;
+    if (deliveryCityField) deliveryCityField.hidden = !["nova-poshta-branch", "nova-poshta-courier"].includes(selectedDelivery);
+    if (deliveryAddressField) deliveryAddressField.hidden = !["lviv-courier", "nova-poshta-branch", "nova-poshta-courier"].includes(selectedDelivery);
+  };
+
+  const renderOrderSummary = () => {
+    if (!summaryBox || !totalBox) return;
+    const lines = [
+      draft.material ? `Матеріал: ${draft.material}` : "Матеріал: уточнюється",
+      draft.size ? `Розмір: ${draft.size}` : "Розмір: уточнюється",
+      draft.quantity ? `Тираж: ${Number(draft.quantity).toLocaleString("uk-UA")} шт` : "Тираж: уточнюється",
+      draft.kindCount ? `Різних видів: ${draft.kindCount}` : "Різних видів: 1",
+      draft.print ? `Друк: ${draft.print}` : null,
+      draft.cut ? `Порізка: ${draft.cut}` : null,
+      draft.finish ? `Покриття: ${draft.finish}` : null
+    ].filter(Boolean);
+    summaryBox.innerHTML = lines.map((line) => `<div>${line}</div>`).join("");
+    totalBox.textContent = draft.total || "Ціну уточнимо після перевірки";
+  };
+
+  renderOrderSummary();
+  updateLayoutState();
+  updateDeliveryState();
+
+  layoutInputs.forEach((input) => input.addEventListener("change", updateLayoutState));
+  deliveryInputs.forEach((input) => input.addEventListener("change", updateDeliveryState));
+
+  orderFormPage.addEventListener("submit", (event) => {
+    event.preventDefault();
+
+    const selectedDelivery = orderFormPage.querySelector('input[name="delivery"]:checked')?.nextElementSibling?.textContent?.trim() || "Уточню";
+    const selectedLayout = orderFormPage.querySelector('input[name="layout-state"]:checked')?.value || "designer";
+    const layoutLabelMap = {
+      designer: "Файлу немає, потрібна допомога дизайнера",
+      link: "Додасть посилання на файл",
+      upload: "Додає файли"
+    };
+
+    const message = [
+      "Добрий день! Хочу оформити замовлення.",
+      firstNameInput?.value ? `Ім'я: ${firstNameInput.value}` : null,
+      lastNameInput?.value ? `Прізвище: ${lastNameInput.value}` : null,
+      phoneInput?.value ? `Телефон: ${phoneInput.value}` : null,
+      emailInput?.value ? `Email: ${emailInput.value}` : null,
+      "",
+      draft.material ? `Матеріал: ${draft.material}` : null,
+      draft.size ? `Розмір: ${draft.size}` : null,
+      draft.quantity ? `Тираж: ${Number(draft.quantity).toLocaleString("uk-UA")} шт` : null,
+      draft.kindCount ? `Різних видів: ${draft.kindCount}` : null,
+      draft.print ? `Друк: ${draft.print}` : null,
+      draft.cut ? `Порізка: ${draft.cut}` : null,
+      draft.finish ? `Покриття: ${draft.finish}` : null,
+      draft.total ? `Орієнтовна ціна: ${draft.total}` : null,
+      "",
+      `Макет: ${layoutLabelMap[selectedLayout] || "Уточню"}`,
+      selectedDelivery ? `Доставка: ${selectedDelivery}` : null,
+      commentInput?.value ? `Коментар: ${commentInput.value}` : null
+    ].filter(Boolean).join("\n");
+
+    window.location.href = `https://t.me/dsprints?text=${encodeURIComponent(message)}`;
+  });
+
+  if (submitButton) {
+    submitButton.addEventListener("click", () => {});
+  }
 }
 
 const filters = document.querySelectorAll("[data-filter]");

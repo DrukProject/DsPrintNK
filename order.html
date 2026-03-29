@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Оформлення замовлення | DsPrint Наклейки</title>
+  <meta name="description" content="Оформлення замовлення на друк наклейок: контакти, макет, доставка та підтвердження заявки.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/styles.css?v=20260329d">
+</head>
+<body id="top">
+  <header class="site-header" data-header>
+    <div class="container header-wrap">
+      <a class="logo" href="index.html"><span>Ds</span><span class="print">Print</span><small>Наклейки</small></a>
+      <button class="nav-toggle" type="button" data-nav-toggle aria-label="Меню"><span></span><span></span><span></span></button>
+      <nav class="nav-links">
+        <a class="btn btn-primary" href="materials.html">Каталог</a>
+        <a class="nav-link" href="calculator.html">Калькулятор</a>
+        <a class="nav-link" href="tel:+380678003050">+380 67 800 30 50</a>
+      </nav>
+      <nav class="nav-menu" data-nav-menu>
+        <a class="btn btn-primary" href="materials.html">Каталог</a>
+        <a href="calculator.html">Калькулятор</a>
+        <a href="tel:+380678003050">+380 67 800 30 50</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero tight order-hero">
+      <div class="container hero-wrap calc-hero-wrap">
+        <div class="hero-chip">Оформлення замовлення</div>
+        <h1 class="hero-title">Заповніть форму і ми <span class="accent">підтвердимо замовлення</span></h1>
+        <p class="hero-sub">Параметри з калькулятора вже підтягнуті. Залишилось вказати контакти, макет і спосіб доставки.</p>
+      </div>
+    </section>
+
+    <section class="section tight">
+      <div class="container order-layout">
+        <form class="form-card order-form" data-order-form>
+          <div class="order-grid">
+            <section class="order-section">
+              <div class="tag">Контакти</div>
+              <div class="order-fields">
+                <div class="field">
+                  <label for="order-phone">Мобільний замовника</label>
+                  <input id="order-phone" type="tel" placeholder="+380" required>
+                </div>
+                <div class="field">
+                  <label for="order-first-name">Ім'я замовника</label>
+                  <input id="order-first-name" type="text" placeholder="Ім'я" required>
+                </div>
+                <div class="field">
+                  <label for="order-last-name">Прізвище замовника</label>
+                  <input id="order-last-name" type="text" placeholder="Прізвище">
+                </div>
+                <div class="field">
+                  <label for="order-email">Email</label>
+                  <input id="order-email" type="email" placeholder="name@example.com">
+                </div>
+              </div>
+            </section>
+
+            <section class="order-section">
+              <div class="tag">Макет</div>
+              <div class="order-radio-group">
+                <label class="order-radio">
+                  <input type="radio" name="layout-state" value="designer" checked>
+                  <span>Файлу немає, потрібна допомога дизайнера</span>
+                </label>
+                <label class="order-radio">
+                  <input type="radio" name="layout-state" value="link">
+                  <span>Додати посилання на файл або файлообмінник</span>
+                </label>
+                <label class="order-radio">
+                  <input type="radio" name="layout-state" value="upload">
+                  <span>Додати файли</span>
+                </label>
+              </div>
+              <div class="field" data-designer-field>
+                <label for="designer-note">Що треба дизайнеру</label>
+                <textarea id="designer-note" rows="4" placeholder="Опишіть ідею, стиль, текст або референси для дизайнера"></textarea>
+              </div>
+              <div class="field" data-layout-link-field hidden>
+                <label for="layout-link">Посилання на файл</label>
+                <input id="layout-link" type="url" placeholder="https://drive.google.com/...">
+              </div>
+              <div class="field" data-layout-upload-field hidden>
+                <label for="layout-file">Файл для друку</label>
+                <input id="layout-file" type="file" multiple accept=".pdf,.tif,.tiff,.jpg,.jpeg,.eps,.cdr">
+              </div>
+            </section>
+
+            <section class="order-section">
+              <div class="tag">Доставка</div>
+              <div class="order-radio-group">
+                <label class="order-radio">
+                  <input type="radio" name="delivery" value="pickup-lviv" checked>
+                  <span>Самовивіз у Львові</span>
+                </label>
+                <label class="order-radio">
+                  <input type="radio" name="delivery" value="lviv-courier">
+                  <span>Кур'єр по Львову</span>
+                </label>
+                <label class="order-radio">
+                  <input type="radio" name="delivery" value="nova-poshta-branch">
+                  <span>Нова пошта: відділення або поштомат</span>
+                </label>
+                <label class="order-radio">
+                  <input type="radio" name="delivery" value="nova-poshta-courier">
+                  <span>Нова пошта: кур'єр до адреси</span>
+                </label>
+              </div>
+              <div class="field" data-delivery-city-field hidden>
+                <label for="delivery-city">Місто</label>
+                <input id="delivery-city" type="text" placeholder="Наприклад, Київ">
+              </div>
+              <div class="field" data-delivery-address-field hidden>
+                <label for="delivery-address">Адреса / відділення</label>
+                <input id="delivery-address" type="text" placeholder="Вулиця, будинок або номер відділення">
+              </div>
+            </section>
+
+            <section class="order-section">
+              <div class="tag">Коментар</div>
+              <div class="field">
+                <label for="order-comment">Примітка до замовлення</label>
+                <textarea id="order-comment" rows="4" placeholder="Тут можна написати побажання по термінах, пакуванню або друку"></textarea>
+              </div>
+            </section>
+          </div>
+
+          <aside class="result-card order-summary-card">
+            <div class="tag">Ваше замовлення</div>
+            <h3>Що піде в роботу</h3>
+            <div class="order-summary-lines" data-order-summary></div>
+            <div class="order-summary-total" data-order-total>Ціну уточнимо після перевірки</div>
+            <button class="btn btn-primary order-submit" type="submit" data-order-submit>Підтвердити замовлення</button>
+            <p class="order-note">Після підтвердження ми відкриємо діалог у Telegram з уже заповненими даними заявки. Далі сюди легко під'єднаємо Binotel або CRM.</p>
+          </aside>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <a class="back-top" href="#top">↑</a>
+    <div class="container footer-main">
+      <div class="footer-grid">
+        <div><a class="logo" href="index.html"><span style="color:#fff">Ds</span><span class="print">Print</span><small>Наклейки</small></a><p>Оформлення замовлення для наклейок з уже підставленими параметрами з калькулятора.</p></div>
+        <div><h4>Сторінки</h4><ul><li><a href="index.html">Головна</a></li><li><a href="materials.html">Матеріали</a></li><li><a href="calculator.html">Калькулятор</a></li></ul></div>
+        <div><h4>Контакти</h4><ul><li><a href="tel:+380678003050">+380 67 800 30 50</a></li><li><a href="mailto:dsprint.ua@gmail.com">dsprint.ua@gmail.com</a></li><li><a href="https://t.me/dsprints">@dsprints</a></li></ul></div>
+        <div><h4>Адреса</h4><ul><li>Львів, вул. Джерельна 38</li><li>Пн-Пт 09:00-18:00</li><li>Нова Пошта по Україні</li></ul></div>
+        <div><h4>Важливо</h4><ul><li>Макет перевіряємо вручну</li><li>Від 1 шт</li><li>Термінові замовлення можливі</li></ul></div>
+      </div>
+      <div class="footer-bottom">© 2026 DsPrint Наклейки. Усі права захищено.</div>
+    </div>
+  </footer>
+  <script src="assets/app.js?v=20260329d"></script>
+</body>
+</html>
