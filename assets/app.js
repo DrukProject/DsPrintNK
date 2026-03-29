@@ -91,6 +91,8 @@ if (calculator) {
   const unitNode = calculator.querySelector("[data-unit]");
   const areaNode = calculator.querySelector("[data-area]");
   const summaryNode = calculator.querySelector("[data-summary]");
+  const selectionSummaryNode = calculator.querySelector("[data-selection-summary]");
+  const breakdownNode = calculator.querySelector("[data-breakdown]");
   const widthNode = calculator.querySelector("#customWidth");
   const heightNode = calculator.querySelector("#customHeight");
   const quantityNode = calculator.querySelector("#quantity");
@@ -239,6 +241,32 @@ if (calculator) {
 
   const roundMoney = (value) => `${Math.round(value).toLocaleString("uk-UA")} грн`;
   const formatUnit = (value) => `${value.toFixed(2).replace(".", ",")} грн/шт`;
+  const escapeHtml = (value) => String(value)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;");
+  const setSelectionSummary = (parts) => {
+    if (!selectionSummaryNode) return;
+    if (!parts.length) {
+      selectionSummaryNode.innerHTML = '<span class="calc-selection-empty">Оберіть параметри, і тут з\'явиться короткий підсумок.</span>';
+      return;
+    }
+    selectionSummaryNode.innerHTML = parts.map((part) => `<span class="calc-selection-pill">${escapeHtml(part)}</span>`).join("");
+  };
+  const setBreakdown = (items) => {
+    if (!breakdownNode) return;
+    if (!items.length) {
+      breakdownNode.innerHTML = "";
+      return;
+    }
+    breakdownNode.innerHTML = items.map((item) => `
+      <div class="calc-breakdown-item">
+        <span>${escapeHtml(item.label)}</span>
+        <strong>${escapeHtml(item.value)}</strong>
+      </div>
+    `).join("");
+  };
   const getInputValue = (node) => {
     if (node.value === "") return null;
     const raw = Number(node.value);
@@ -304,6 +332,17 @@ if (calculator) {
     const print = printModes[selected.print];
     const cut = cutModes[selected.cut] || cutModes.trim;
     const finish = finishModes[selected.finish] || finishModes.none;
+    const summaryParts = [];
+
+    if (width && height) summaryParts.push(`${width}×${height} мм`);
+    if (quantity) summaryParts.push(`${quantity.toLocaleString("uk-UA")} шт`);
+    if (kindCount) summaryParts.push(`${kindCount} вид`);
+    if (material) summaryParts.push(material.label);
+    if (print) summaryParts.push(print.label);
+    if (cut) summaryParts.push(cut.label);
+    if (finish) summaryParts.push(finish.label);
+
+    setSelectionSummary(summaryParts);
 
     areaNode.textContent = width && height ? `${width}×${height} мм` : "—";
 
@@ -311,6 +350,7 @@ if (calculator) {
       totalNode.textContent = "Оберіть матеріал для друку";
       unitNode.textContent = "—";
       materialLabel.textContent = "не вибрано";
+      setBreakdown([]);
       summaryNode.innerHTML = [
         "Матеріал: не вибрано",
         `Друк: ${print.label}`,
@@ -326,6 +366,7 @@ if (calculator) {
       totalNode.textContent = "Заповніть розміри, тираж і види";
       unitNode.textContent = "—";
       materialLabel.textContent = material.label;
+      setBreakdown([]);
       summaryNode.innerHTML = [
         `Матеріал: ${material.label}`,
         `Друк: ${print.label}`,
@@ -344,6 +385,7 @@ if (calculator) {
       totalNode.textContent = "Немає даних по матеріалу";
       unitNode.textContent = "—";
       materialLabel.textContent = material.label;
+      setBreakdown([]);
       summaryNode.innerHTML = "<div>Для цього матеріалу ще не задані параметри листа.</div>";
       return;
     }
@@ -367,6 +409,13 @@ if (calculator) {
     totalNode.textContent = roundMoney(total);
     unitNode.textContent = formatUnit(total / quantity);
     materialLabel.textContent = material.label;
+    setBreakdown([
+      { label: "Матеріал", value: roundMoney(materialCharge) },
+      { label: "Друк", value: roundMoney(printCharge) },
+      { label: "Порізка", value: roundMoney(cutCharge) },
+      { label: "Покриття", value: roundMoney(finishCharge) },
+      { label: "Разом", value: roundMoney(total) }
+    ]);
     summaryNode.innerHTML = [
       `Матеріал: ${material.label}`,
       `Профіль листа: ${profile.label} ${profile.stockWidth}×${profile.stockHeight} мм`,

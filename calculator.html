@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/styles.css?v=20260329b">
+  <link rel="stylesheet" href="assets/styles.css?v=20260329c">
 </head>
 <body id="top">
   <header class="site-header" data-header>
@@ -113,6 +113,7 @@
 
           <div class="option-block centered">
             <label>Порізка</label>
+            <p class="option-help">Поштучно для прямокутних стікерів, по контуру для фігурних форм.</p>
             <div class="option-grid centered compact" data-option-group="cut">
               <button type="button" class="option-pill active" data-value="pieceTrim">порізка поштучно</button>
               <button type="button" class="option-pill" data-value="digitalContour">фігурна порізка (по контуру)</button>
@@ -121,6 +122,7 @@
 
           <div class="option-block centered" data-finish-panel>
             <label>Покриття</label>
+            <p class="option-help">Ламінація додає захист і змінює відчуття поверхні. Soft touch дає м'який преміальний ефект.</p>
             <div class="option-grid centered compact" data-option-group="finish">
               <button type="button" class="option-pill active" data-value="none">без покриття</button>
               <button type="button" class="option-pill" data-value="glossLam">одностороння глянцева ламінація</button>
@@ -132,13 +134,22 @@
           <div class="result-card calc-result bottom" data-result-card>
             <div class="tag">Ціна</div>
             <h3>Підсумок прорахунку</h3>
+            <div class="calc-selection" data-selection-summary>
+              <span class="calc-selection-empty">Оберіть параметри, і тут з'явиться короткий підсумок.</span>
+            </div>
             <strong data-total>Оберіть матеріал для друку</strong>
             <div class="price-inline">
               <div><span>ціна за 1 шт</span><b data-unit>—</b></div>
               <div><span>розмір</span><b data-area>0 мм</b></div>
               <div><span>матеріал</span><b data-material-label>не вибрано</b></div>
             </div>
+            <div class="calc-breakdown" data-breakdown></div>
             <div class="calc-summary" data-summary></div>
+            <div class="calc-result-actions">
+              <a class="btn btn-primary" href="https://t.me/dsprints">Написати в Telegram</a>
+              <a class="btn btn-outline" href="tel:+380678003050">Подзвонити</a>
+            </div>
+            <p class="calc-result-note">Підкажемо по макету і перед друком ще раз усе перевіримо вручну.</p>
           </div>
         </form>
       </div>
@@ -158,7 +169,7 @@
       <div class="footer-bottom">© 2026 DsPrint Наклейки. Усі права захищено.</div>
     </div>
   </footer>
-  <script src="assets/pricing-data.js?v=20260329b"></script>
-  <script src="assets/app.js?v=20260329b"></script>
+  <script src="assets/pricing-data.js?v=20260329c"></script>
+  <script src="assets/app.js?v=20260329c"></script>
 </body>
 </html>
