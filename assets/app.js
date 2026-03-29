@@ -101,15 +101,6 @@ if (calculator) {
   const finishPanel = calculator.querySelector("[data-finish-panel]");
   const materialPanel = calculator.querySelector("[data-material-panel]");
   const materialButtons = calculator.querySelectorAll('[data-option-group="material"] .option-pill');
-  const materialHint = calculator.querySelector("[data-material-hint]") || (() => {
-    const hint = document.createElement("div");
-    hint.className = "material-hint";
-    hint.dataset.materialHint = "";
-    hint.hidden = true;
-    hint.textContent = "Після вибору нижче з'явиться список конкретних матеріалів.";
-    calculator.querySelector(".material-categories")?.after(hint);
-    return hint;
-  })();
 
   const materials = {
     upmMatte: { label: "UPM біла матова без просічки", factor: 1, category: "whiteFilm" },
@@ -161,7 +152,6 @@ if (calculator) {
 
   const syncMaterialCategory = () => {
     if (materialPanel) materialPanel.hidden = !selected.materialCategory;
-    if (materialHint) materialHint.hidden = !selected.materialCategory;
     calculator.querySelectorAll('[data-option-group="materialCategory"] .option-pill').forEach((button) => {
       button.classList.toggle("active", button.dataset.value === selected.materialCategory);
     });
