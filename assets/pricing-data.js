@@ -40,7 +40,28 @@ window.PRINT_CALC_DATA = {
       }
     },
     ritramaClear: { sheetCost: 28.9, profile: "film" },
-    ritramaWhite: { sheetCost: 28.45, profile: "film" },
+    ritramaWhite: {
+      sheetCost: 28.45,
+      profile: "film",
+      printOverrides: {
+        color1: {
+          minCharge: 24.95,
+          curve: [
+            { sheets: 1, total: 24.95 },
+            { sheets: 2, total: 50.5 },
+            { sheets: 3, total: 76.05 },
+            { sheets: 5, total: 108.15 },
+            { sheets: 13, total: 201.55 },
+            { sheets: 25, total: 339.15 },
+            { sheets: 50, total: 616.9 },
+            { sheets: 125, total: 1383.15 },
+            { sheets: 250, total: 2434.9 },
+            { sheets: 375, total: 3271.65 },
+            { sheets: 500, total: 4353.4 }
+          ]
+        }
+      }
+    },
     waterproof: { sheetCost: 29.3, profile: "film" },
     paperSlits: { sheetCost: 10.39, profile: "paper" },
     woodstock: { sheetCost: 12.4, profile: "paper" },
