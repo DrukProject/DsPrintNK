@@ -62,6 +62,11 @@ window.PRINT_CALC_DATA = {
     trim: { setupFee: 0, maxPerSheet: 0.266, minPerSheet: 0.266, minSheets: 1, maxSheets: 500, minCharge: 26.6 },
     pieceTrim: {
       minCharge: 26.6,
+      formatMinimums: [
+        { maxArea: 7000, total: 113 },
+        { maxArea: 10000, total: 100 },
+        { maxArea: 15000, total: 87 }
+      ],
       curve: [
         { sheets: 1, total: 26.6 },
         { sheets: 500, total: 26.6 }

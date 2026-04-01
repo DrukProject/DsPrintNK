@@ -327,6 +327,14 @@ if (calculator) {
     const minCharge = config.minCharge || 0;
     return Math.max(setupFee + rate * sheetCount, minCharge);
   };
+  const getFormatMinimumTotal = (config, width, height) => {
+    if (!config || !Array.isArray(config.formatMinimums) || !config.formatMinimums.length) return 0;
+    const area = width * height;
+    const rule = [...config.formatMinimums]
+      .sort((a, b) => a.maxArea - b.maxArea)
+      .find((entry) => area <= entry.maxArea);
+    return rule ? rule.total : 0;
+  };
 
   const calculate = () => {
     const width = clampInputValue(widthNode, { writeBack: false });
@@ -433,7 +441,8 @@ if (calculator) {
     const cutCharge = getVolumeCharge(cutConfig, totalSheets);
     const finishCharge = getVolumeCharge(finishConfig, totalSheets);
     const materialCharge = totalSheets * sheetCost;
-    const total = materialCharge + printCharge + cutCharge + finishCharge;
+    const formatMinimumTotal = getFormatMinimumTotal(cutConfig, width, height);
+    const total = Math.max(materialCharge + printCharge + cutCharge + finishCharge, formatMinimumTotal);
 
     totalNode.textContent = roundMoney(total);
     unitNode.textContent = formatUnit(total / quantity);
