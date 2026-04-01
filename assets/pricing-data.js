@@ -62,7 +62,28 @@ window.PRINT_CALC_DATA = {
         }
       }
     },
-    waterproof: { sheetCost: 29.3, profile: "film" },
+    waterproof: {
+      sheetCost: 29.3,
+      profile: "film",
+      printOverrides: {
+        color1: {
+          minCharge: 27.1,
+          curve: [
+            { sheets: 1, total: 27.1 },
+            { sheets: 2, total: 53.8 },
+            { sheets: 3, total: 80.5 },
+            { sheets: 5, total: 115.9 },
+            { sheets: 13, total: 220.5 },
+            { sheets: 25, total: 376.9 },
+            { sheets: 50, total: 691.4 },
+            { sheets: 125, total: 1569.9 },
+            { sheets: 250, total: 2809.4 },
+            { sheets: 375, total: 3832.9 },
+            { sheets: 500, total: 5101.4 }
+          ]
+        }
+      }
+    },
     paperSlits: { sheetCost: 10.39, profile: "paper" },
     woodstock: { sheetCost: 12.4, profile: "paper" },
     kraft: { sheetCost: 11.3, profile: "paper" },
