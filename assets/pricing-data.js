@@ -49,14 +49,22 @@ window.PRINT_CALC_DATA = {
         { sheets: 25, total: 288.65 },
         { sheets: 50, total: 516.9 },
         { sheets: 100, total: 935.4 },
-        { sheets: 250, total: 1895 },
-        { sheets: 500, total: 3247 }
+        { sheets: 125, total: 1132.65 },
+        { sheets: 250, total: 1934.9 },
+        { sheets: 425, total: 2854.65 },
+        { sheets: 500, total: 3353.4 }
       ]
     }
   },
   cutModes: {
     trim: { setupFee: 0, maxPerSheet: 0.266, minPerSheet: 0.266, minSheets: 1, maxSheets: 500, minCharge: 26.6 },
-    pieceTrim: { setupFee: 20, maxPerSheet: 2.5, minPerSheet: 1.2, minSheets: 1, maxSheets: 500, minCharge: 35 },
+    pieceTrim: {
+      minCharge: 26.6,
+      curve: [
+        { sheets: 1, total: 26.6 },
+        { sheets: 500, total: 26.6 }
+      ]
+    },
     digitalContour: { setupFee: 80, maxPerSheet: 45, minPerSheet: 10, minSheets: 1, maxSheets: 500, minCharge: 120 }
   },
   finishModes: {
