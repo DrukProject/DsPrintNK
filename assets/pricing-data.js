@@ -77,6 +77,7 @@ window.PRINT_CALC_DATA = {
             { sheets: 25, total: 376.9 },
             { sheets: 50, total: 691.4 },
             { sheets: 125, total: 1569.9 },
+            { sheets: 175, total: 2101.9 },
             { sheets: 250, total: 2809.4 },
             { sheets: 375, total: 3832.9 },
             { sheets: 500, total: 5101.4 }
