@@ -434,7 +434,7 @@ if (calculator) {
     const sheetsPerKind = itemsPerSheet > 0 ? Math.ceil(qtyPerKind / itemsPerSheet) : 0;
     const totalSheets = sheetsPerKind * kindCount;
     const sheetCost = pricingMaterial.sheetCost || 0;
-    const printConfig = printPricing[selected.print] || {};
+    const printConfig = pricingMaterial.printOverrides?.[selected.print] || printPricing[selected.print] || {};
     const cutConfig = cutPricing[selected.cut] || cutPricing.trim || {};
     const finishConfig = finishPricing[selected.finish] || {};
     const printCharge = getVolumeCharge(printConfig, totalSheets);

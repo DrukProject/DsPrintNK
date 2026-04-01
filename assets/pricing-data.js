@@ -18,7 +18,27 @@ window.PRINT_CALC_DATA = {
     }
   },
   materials: {
-    upmMatte: { sheetCost: 28.18, profile: "film" },
+    upmMatte: {
+      sheetCost: 28.18,
+      profile: "film",
+      printOverrides: {
+        color1: {
+          minCharge: 51.22,
+          curve: [
+            { sheets: 1, total: 51.22 },
+            { sheets: 3, total: 152.86 },
+            { sheets: 5, total: 236.5 },
+            { sheets: 13, total: 535.06 },
+            { sheets: 25, total: 979.9 },
+            { sheets: 50, total: 1899.4 },
+            { sheets: 100, total: 3699.4 },
+            { sheets: 175, total: 6327.9 },
+            { sheets: 250, total: 8846.4 },
+            { sheets: 500, total: 17176.4 }
+          ]
+        }
+      }
+    },
     ritramaClear: { sheetCost: 28.9, profile: "film" },
     ritramaWhite: { sheetCost: 28.45, profile: "film" },
     waterproof: { sheetCost: 29.3, profile: "film" },
