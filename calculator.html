@@ -37,7 +37,7 @@
           </div>
 
           <div class="calc-toolbar">
-            <div class="toolbar-box toolbar-box-inline">
+            <div class="toolbar-box">
               <label for="customWidth">розміри</label>
               <div class="toolbar-inline">
                 <input id="customWidth" type="number" min="20" max="320" value="210">
@@ -45,8 +45,15 @@
                 <input id="customHeight" type="number" min="20" max="450" value="297">
                 <strong>мм</strong>
               </div>
+              <div class="preset-row">
+                <button type="button" class="preset-btn" data-size="50x50">50×50</button>
+                <button type="button" class="preset-btn" data-size="70x100">70×100</button>
+                <button type="button" class="preset-btn" data-size="90x50">90×50</button>
+                <button type="button" class="preset-btn" data-size="100x100">100×100</button>
+                <button type="button" class="preset-btn" data-size="100x150">100×150</button>
+              </div>
             </div>
-            <div class="toolbar-box toolbar-box-inline">
+            <div class="toolbar-box">
               <label for="quantity">тираж</label>
               <div class="toolbar-inline">
                 <button type="button" class="step-btn" data-step-target="quantity" data-step="-1">−</button>
@@ -55,7 +62,7 @@
                 <strong>шт</strong>
               </div>
             </div>
-            <div class="toolbar-box toolbar-box-inline">
+            <div class="toolbar-box">
               <label for="kindCount">різних видів</label>
               <div class="toolbar-inline">
                 <button type="button" class="step-btn" data-step-target="kindCount" data-step="-1">−</button>
@@ -63,13 +70,6 @@
                 <button type="button" class="step-btn" data-step-target="kindCount" data-step="1">+</button>
               </div>
             </div>
-          </div>
-          <div class="preset-row calc-preset-row">
-            <button type="button" class="preset-btn" data-size="50x50">50×50</button>
-            <button type="button" class="preset-btn" data-size="70x100">70×100</button>
-            <button type="button" class="preset-btn" data-size="90x50">90×50</button>
-            <button type="button" class="preset-btn" data-size="100x100">100×100</button>
-            <button type="button" class="preset-btn" data-size="100x150">100×150</button>
           </div>
 
           <div class="option-block centered">
