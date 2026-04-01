@@ -50,6 +50,8 @@ window.PRINT_CALC_DATA = {
         { sheets: 50, total: 516.9 },
         { sheets: 100, total: 935.4 },
         { sheets: 125, total: 1132.65 },
+        { sheets: 184, total: 1553.64 },
+        { sheets: 218, total: 1760.38 },
         { sheets: 250, total: 1934.9 },
         { sheets: 425, total: 2854.65 },
         { sheets: 500, total: 3353.4 }
