@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DsPrint Price Lab</title>
+  <meta name="robots" content="noindex,nofollow">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/styles.css?v=20260408a">
+</head>
+<body class="price-lab-page">
+  <main class="section" data-price-lab>
+    <div class="container">
+      <div class="tag">Price Lab</div>
+      <h1 class="section-title">Порівняння наших цін із DPI</h1>
+      <p class="section-sub">Прихована службова сторінка без кнопки в меню. Тут можна дивитися базові розміри, порівнювати нашу модель з референсом DPI і вручну підправляти референсні ціни локально.</p>
+
+      <section class="form-card price-lab-shell">
+        <div class="price-lab-toolbar">
+          <label class="price-lab-control">
+            <span>Тираж</span>
+            <input type="number" min="1" step="1" value="100" data-price-lab-quantity>
+          </label>
+          <div class="price-lab-control">
+            <span>Друк</span>
+            <div class="option-grid" data-price-lab-print></div>
+          </div>
+          <div class="price-lab-control">
+            <span>Оздоблення</span>
+            <div class="option-grid" data-price-lab-finish></div>
+          </div>
+          <div class="price-lab-control">
+            <span>Порізка</span>
+            <div class="option-grid" data-price-lab-cut></div>
+          </div>
+          <div class="price-lab-actions">
+            <button type="button" class="btn btn-outline" data-price-lab-clear>Очистити локальні правки</button>
+          </div>
+        </div>
+
+        <div class="price-lab-summary" data-price-lab-summary></div>
+
+        <div class="price-lab-table-wrap">
+          <table class="price-lab-table">
+            <thead>
+              <tr>
+                <th>Розмір</th>
+                <th>На лист</th>
+                <th>Листів</th>
+                <th>Наша ціна</th>
+                <th>DPI</th>
+                <th>Різниця</th>
+                <th>Змінити DPI</th>
+                <th>Дія</th>
+              </tr>
+            </thead>
+            <tbody data-price-lab-body></tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <script src="assets/pricing-data.js?v=20260408a"></script>
+  <script src="assets/dpi-price-reference.js?v=20260408a"></script>
+  <script src="assets/calculator-engine.js?v=20260408a"></script>
+  <script src="assets/price-lab.js?v=20260408a"></script>
+</body>
+</html>

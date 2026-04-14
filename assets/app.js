@@ -24,7 +24,7 @@ const ensureContactFab = () => {
             <path d="M6.62 10.79a15.05 15.05 0 0 0 6.59 6.59l2.2-2.2a1 1 0 0 1 1.01-.24c1.11.37 2.3.57 3.53.57a1 1 0 0 1 1 1V20a1 1 0 0 1-1 1C10.3 21 3 13.7 3 4a1 1 0 0 1 1-1h3.49a1 1 0 0 1 1 1c0 1.23.2 2.42.57 3.53a1 1 0 0 1-.24 1.01z" fill="currentColor"/>
           </svg>
         </span>
-        Зворотній дзвінок
+        Зворотний дзвінок
       </button>
       <a class="fab-pill" href="https://t.me/dsprints">
         <span class="icon tg" aria-hidden="true"><img src="https://cdn.simpleicons.org/telegram/FFFFFF" alt=""></span>
@@ -41,6 +41,7 @@ const ensureContactFab = () => {
       </svg>
     </button>
   `;
+
   footer.before(contactFab);
   return contactFab;
 };
@@ -52,6 +53,12 @@ const cleanupDuplicateNavLinks = () => {
     materialLinks.slice(1).forEach((link) => link.remove());
   });
 };
+
+const escapeHtml = (value) => String(value)
+  .replaceAll("&", "&amp;")
+  .replaceAll("<", "&lt;")
+  .replaceAll(">", "&gt;")
+  .replaceAll('"', "&quot;");
 
 cleanupDuplicateNavLinks();
 ensureContactFab();
@@ -80,12 +87,14 @@ if (navToggle && navMenu) {
     if (window.innerWidth >= 1024) setNavOpen(false);
   });
 }
+
 if (fabToggle && fabPanel) fabToggle.addEventListener("click", () => fabPanel.classList.toggle("open"));
 if (callbackToggle && callbackForm) callbackToggle.addEventListener("click", () => callbackForm.classList.toggle("open"));
 
 const calculator = document.querySelector("[data-calculator]");
-if (calculator) {
+if (calculator && window.StickerSheetCalculator) {
   const pricingData = window.PRINT_CALC_DATA || {};
+  const calculatorEngine = window.StickerSheetCalculator;
   const materialLabel = calculator.querySelector("[data-material-label]");
   const totalNode = calculator.querySelector("[data-total]");
   const unitNode = calculator.querySelector("[data-unit]");
@@ -93,63 +102,94 @@ if (calculator) {
   const summaryNode = calculator.querySelector("[data-summary]");
   const selectionSummaryNode = calculator.querySelector("[data-selection-summary]");
   const breakdownNode = calculator.querySelector("[data-breakdown]");
-  const orderLink = calculator.querySelector("[data-order-link]");
   const widthNode = calculator.querySelector("#customWidth");
   const heightNode = calculator.querySelector("#customHeight");
   const quantityNode = calculator.querySelector("#quantity");
   const kindCountNode = calculator.querySelector("#kindCount");
   const presetButtons = calculator.querySelectorAll("[data-size]");
   const stepButtons = calculator.querySelectorAll("[data-step-target]");
-  const finishPanel = calculator.querySelector("[data-finish-panel]");
   const materialPanel = calculator.querySelector("[data-material-panel]");
   const materialButtons = calculator.querySelectorAll('[data-option-group="material"] .option-pill');
 
   const materials = {
-    upmMatte: { label: "UPM біла матова без просічки", factor: 1, category: "whiteFilm" },
-    ritramaClear: { label: "Ritrama прозора глянець", factor: 1.02, category: "clearFilm" },
-    ritramaWhite: { label: "Ritrama біла глянець", factor: 1.01, category: "whiteFilm" },
-    paperSlits: { label: "Самоклеючий папір з надсічками UPM Raflatac", factor: 1, category: "paper" },
-    woodstock: { label: "Woodstock Betulla кремовий", factor: 1.02, category: "designer" },
-    waterproof: { label: "Waterproof White вологостійкий", factor: 1.03, category: "whiteFilm" },
-    kraft: { label: "UPM бурий крафт смугастий", factor: 1.01, category: "designer" },
-    tintoretto: { label: "Tintoretto Angora світло-сірий", factor: 1.03, category: "designer" },
-    sirio: { label: "Sirio Pearl Ice White", factor: 1.05, category: "designer" },
-    silver: { label: "Lam Foil Matt Silver", factor: 1.04, category: "designer" },
-    embossed: { label: "Embossed Coated Skin", factor: 1.03, category: "designer" },
-    snow: { label: "Constellation Snow Vergata", factor: 1.04, category: "designer" },
-    jade: { label: "Constellation Jade Raster", factor: 1.05, category: "designer" },
-    antiquaWhite: { label: "Antiqua White верже", factor: 1.03, category: "designer" },
-    antiquaIvory: { label: "Antiqua Ivory верже", factor: 1.03, category: "designer" },
-    acquerello: { label: "Acquerello Avorio мікровельвет", factor: 1.04, category: "designer" }
+    upmMatte: { label: "UPM біла матова без просічки", category: "whiteFilm" },
+    ritramaClear: { label: "Ritrama прозора глянець", category: "clearFilm" },
+    ritramaWhite: { label: "Ritrama біла глянець", category: "whiteFilm" },
+    paperSlits: { label: "Самоклеючий папір з надсічками UPM Raflatac", category: "paper" },
+    woodstock: { label: "Woodstock Betulla кремовий", category: "designer" },
+    waterproof: { label: "Waterproof White вологостійкий", category: "whiteFilm" },
+    kraft: { label: "UPM бурий крафт смугастий", category: "designer" },
+    tintoretto: { label: "Tintoretto Angora світло сірий", category: "designer" },
+    sirio: { label: "Sirio Pearl Ice White", category: "designer" },
+    silver: { label: "Lam Foil Matt Silver", category: "designer" },
+    embossed: { label: "Embossed Coated Skin", category: "designer" },
+    snow: { label: "Constellation Snow Vergata", category: "designer" },
+    jade: { label: "Constellation Jade Raster", category: "designer" },
+    antiquaWhite: { label: "Antiqua White", category: "designer" },
+    antiquaIvory: { label: "Antiqua Ivory", category: "designer" },
+    acquerello: { label: "Acquerello Avorio", category: "designer" }
   };
 
-  const printModes = {
-    blank: { label: "Без друку", base: 2818 },
-    bw1: { label: "Чорно-білий односторонній", base: 3033 },
-    color1: { label: "Повноколірний односторонній", base: 3335 }
-  };
-
-  const cutModes = {
-    trim: { label: "Порізка в формат", adjust: 0 },
-    pieceTrim: { label: "Порізка поштучно", adjust: 60 },
-    digitalContour: { label: "Фігурна порізка (по контуру)", adjust: 185 }
-  };
-
-  const finishModes = {
-    none: { label: "Без покриття", adjust: 0 },
-    glossLam: { label: "Одностороння глянцева ламінація", adjust: 110 },
-    matteLam: { label: "Одностороння матова ламінація", adjust: 130 },
-    softTouch: { label: "Одностороння soft touch", adjust: 160 }
-  };
-
-  const sheetProfiles = pricingData.sheetProfiles || {};
-  const materialPricing = pricingData.materials || {};
-  const printPricing = pricingData.printModes || {};
-  const cutPricing = pricingData.cutModes || {};
-  const finishPricing = pricingData.finishModes || {};
-
+  const printModes = pricingData.printModes || {};
+  const cutModes = pricingData.cutModes || {};
+  const finishModes = pricingData.finishModes || {};
   const selected = { materialCategory: "paper", material: "paperSlits", print: "color1", cut: "pieceTrim", finish: "none" };
   const fallbackValues = { print: "blank", finish: "none" };
+
+  const roundMoney = (value) => `${Math.round(value).toLocaleString("uk-UA")} грн`;
+  const formatMoney = (value) => `${value.toFixed(2).replace(".", ",")} грн`;
+  const formatUnit = (value) => `${value.toFixed(2).replace(".", ",")} грн/шт`;
+
+  const saveOrderDraft = (draft) => {
+    try {
+      window.sessionStorage.setItem("dsprintOrderDraft", JSON.stringify(draft));
+    } catch {}
+  };
+
+  const getInputValue = (node) => {
+    if (node.value === "") return null;
+    const raw = Number(node.value);
+    return Number.isFinite(raw) ? raw : null;
+  };
+
+  const clampInputValue = (node, { writeBack = true } = {}) => {
+    const parsedValue = getInputValue(node);
+    if (parsedValue === null) return null;
+    const min = Number(node.min || 0);
+    const max = Number(node.max || Number.MAX_SAFE_INTEGER);
+    const safeValue = Math.min(Math.max(parsedValue, min), max);
+    if (writeBack) node.value = safeValue;
+    return safeValue;
+  };
+
+  const setSelectionSummary = (parts) => {
+    if (!selectionSummaryNode) return;
+    if (!parts.length) {
+      selectionSummaryNode.innerHTML = '<span class="calc-selection-empty">Оберіть параметри, і тут з\'явиться короткий підсумок.</span>';
+      return;
+    }
+    selectionSummaryNode.innerHTML = parts.map((part) => `<span class="calc-selection-pill">${escapeHtml(part)}</span>`).join("");
+  };
+
+  const setBreakdown = (items) => {
+    if (!breakdownNode) return;
+    breakdownNode.hidden = !items.length;
+    if (!items.length) {
+      breakdownNode.innerHTML = "";
+      return;
+    }
+    breakdownNode.innerHTML = items.map((item) => `
+      <div class="calc-breakdown-item">
+        <span>${escapeHtml(item.label)}</span>
+        <strong>${escapeHtml(item.value)}</strong>
+      </div>
+    `).join("");
+  };
+
+  const setSummaryLines = (lines) => {
+    if (!summaryNode) return;
+    summaryNode.innerHTML = lines.map((line) => `<div>${escapeHtml(line)}</div>`).join("");
+  };
 
   const syncMaterialCategory = () => {
     if (materialPanel) materialPanel.hidden = !selected.materialCategory;
@@ -159,14 +199,36 @@ if (calculator) {
     materialButtons.forEach((button) => {
       const visible = !!selected.materialCategory && button.dataset.materialCategory === selected.materialCategory;
       button.hidden = !visible;
-      button.classList.toggle("active", visible && !!selected.material && button.dataset.value === selected.material);
+      button.classList.toggle("active", visible && button.dataset.value === selected.material);
     });
+  };
+
+  const getLabels = () => ({
+    material: selected.material ? materials[selected.material] : null,
+    print: printModes[selected.print] || { label: "" },
+    cut: cutModes[selected.cut] || { label: "" },
+    finish: finishModes[selected.finish] || { label: "" }
+  });
+
+  const buildSummaryParts = ({ width, height, quantity, kindCount, labels, approximate }) => {
+    const parts = [];
+    const totalQuantity = quantity && kindCount ? quantity * kindCount : quantity;
+    if (width && height) parts.push(`${width}×${height} мм`);
+    if (totalQuantity) parts.push(`${totalQuantity.toLocaleString("uk-UA")} шт`);
+    if (kindCount) parts.push(`${kindCount} вид.`);
+    if (labels.material) parts.push(labels.material.label);
+    if (labels.print?.label) parts.push(labels.print.label);
+    if (labels.cut?.label) parts.push(labels.cut.label);
+    if (labels.finish?.label) parts.push(labels.finish.label);
+    if (approximate) parts.push("орієнтовно");
+    return parts;
   };
 
   calculator.querySelectorAll("[data-option-group]").forEach((group) => {
     group.addEventListener("click", (event) => {
       const button = event.target.closest(".option-pill");
       if (!button) return;
+
       const groupName = group.dataset.optionGroup;
       if (groupName === "materialCategory") {
         const isSame = selected.materialCategory === button.dataset.value;
@@ -190,6 +252,7 @@ if (calculator) {
         calculate();
         return;
       }
+
       if (groupName === "material") {
         const isSame = selected.material === button.dataset.value;
         group.querySelectorAll(".option-pill").forEach((item) => item.classList.remove("active"));
@@ -203,6 +266,7 @@ if (calculator) {
         calculate();
         return;
       }
+
       const isSame = selected[groupName] === button.dataset.value;
       group.querySelectorAll(".option-pill").forEach((item) => item.classList.remove("active"));
       if (isSame && fallbackValues[groupName]) {
@@ -234,134 +298,24 @@ if (calculator) {
       const step = Number(button.dataset.step);
       const min = Number(target.min || 0);
       const max = Number(target.max || Number.MAX_SAFE_INTEGER);
-      const currentValue = target.value === "" ? (step > 0 ? min : min) : Number(target.value);
+      const currentValue = target.value === "" ? min : Number(target.value);
       target.value = Math.min(Math.max(currentValue + step, min), max);
       calculate();
     });
   });
-
-  const roundMoney = (value) => `${Math.round(value).toLocaleString("uk-UA")} грн`;
-  const formatUnit = (value) => `${value.toFixed(2).replace(".", ",")} грн/шт`;
-  const escapeHtml = (value) => String(value)
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;");
-  const setSelectionSummary = (parts) => {
-    if (!selectionSummaryNode) return;
-    if (!parts.length) {
-      selectionSummaryNode.innerHTML = '<span class="calc-selection-empty">Оберіть параметри, і тут з\'явиться короткий підсумок.</span>';
-      return;
-    }
-    selectionSummaryNode.innerHTML = parts.map((part) => `<span class="calc-selection-pill">${escapeHtml(part)}</span>`).join("");
-  };
-  const setBreakdown = (items) => {
-    if (!breakdownNode) return;
-    if (!items.length) {
-      breakdownNode.innerHTML = "";
-      return;
-    }
-    breakdownNode.innerHTML = items.map((item) => `
-      <div class="calc-breakdown-item">
-        <span>${escapeHtml(item.label)}</span>
-        <strong>${escapeHtml(item.value)}</strong>
-      </div>
-    `).join("");
-  };
-  const saveOrderDraft = (draft) => {
-    try {
-      window.sessionStorage.setItem("dsprintOrderDraft", JSON.stringify(draft));
-    } catch {}
-  };
-  const getInputValue = (node) => {
-    if (node.value === "") return null;
-    const raw = Number(node.value);
-    return Number.isFinite(raw) ? raw : null;
-  };
-  const clampInputValue = (node, { writeBack = true } = {}) => {
-    const parsedValue = getInputValue(node);
-    if (parsedValue === null) return null;
-    const min = Number(node.min || 0);
-    const max = Number(node.max || Number.MAX_SAFE_INTEGER);
-    const safeValue = Math.min(Math.max(parsedValue, min), max);
-    if (writeBack) node.value = safeValue;
-    return safeValue;
-  };
-  const getFitCount = (sheetWidth, sheetHeight, itemWidth, itemHeight) => {
-    if (!itemWidth || !itemHeight) return 0;
-    const normal = Math.floor(sheetWidth / itemWidth) * Math.floor(sheetHeight / itemHeight);
-    const rotated = Math.floor(sheetWidth / itemHeight) * Math.floor(sheetHeight / itemWidth);
-    return Math.max(normal, rotated);
-  };
-  const getVolumeRate = (config, sheetCount) => {
-    if (!config) return 0;
-    const minSheets = config.minSheets || 1;
-    const maxSheets = config.maxSheets || 500;
-    const maxPerSheet = config.maxPerSheet || 0;
-    const minPerSheet = config.minPerSheet || 0;
-    if (sheetCount <= minSheets) return maxPerSheet;
-    if (sheetCount >= maxSheets) return minPerSheet;
-    const progress = (sheetCount - minSheets) / Math.max(maxSheets - minSheets, 1);
-    return maxPerSheet - (maxPerSheet - minPerSheet) * progress;
-  };
-  const getVolumeCharge = (config, sheetCount) => {
-    if (!config || !sheetCount) return 0;
-    if (Array.isArray(config.curve) && config.curve.length) {
-      const points = [...config.curve].sort((a, b) => a.sheets - b.sheets);
-      if (sheetCount <= points[0].sheets) return points[0].total;
-      for (let i = 1; i < points.length; i += 1) {
-        const prev = points[i - 1];
-        const next = points[i];
-        if (sheetCount <= next.sheets) {
-          const progress = (sheetCount - prev.sheets) / Math.max(next.sheets - prev.sheets, 1);
-          return prev.total + (next.total - prev.total) * progress;
-        }
-      }
-      const last = points[points.length - 1];
-      const prev = points[points.length - 2] || last;
-      const tailRate = (last.total - prev.total) / Math.max(last.sheets - prev.sheets, 1);
-      return last.total + (sheetCount - last.sheets) * tailRate;
-    }
-    const rate = getVolumeRate(config, sheetCount);
-    const setupFee = config.setupFee || 0;
-    const minCharge = config.minCharge || 0;
-    return Math.max(setupFee + rate * sheetCount, minCharge);
-  };
-  const getFormatMinimumTotal = (config, width, height) => {
-    if (!config || !Array.isArray(config.formatMinimums) || !config.formatMinimums.length) return 0;
-    const area = width * height;
-    const rule = [...config.formatMinimums]
-      .sort((a, b) => a.maxArea - b.maxArea)
-      .find((entry) => area <= entry.maxArea);
-    return rule ? rule.total : 0;
-  };
 
   const calculate = () => {
     const width = clampInputValue(widthNode, { writeBack: false });
     const height = clampInputValue(heightNode, { writeBack: false });
     const quantity = clampInputValue(quantityNode, { writeBack: false });
     const kindCount = clampInputValue(kindCountNode, { writeBack: false });
-
-    const material = selected.material ? materials[selected.material] : null;
-    const print = printModes[selected.print];
-    const cut = cutModes[selected.cut] || cutModes.trim;
-    const finish = finishModes[selected.finish] || finishModes.none;
-    const summaryParts = [];
-
-    if (width && height) summaryParts.push(`${width}×${height} мм`);
-    if (quantity) summaryParts.push(`${quantity.toLocaleString("uk-UA")} шт`);
-    if (kindCount) summaryParts.push(`${kindCount} вид`);
-    if (material) summaryParts.push(material.label);
-    if (print) summaryParts.push(print.label);
-    if (cut) summaryParts.push(cut.label);
-    if (finish) summaryParts.push(finish.label);
-
-    setSelectionSummary(summaryParts);
+    const totalQuantity = quantity && kindCount ? quantity * kindCount : quantity;
+    const labels = getLabels();
 
     areaNode.textContent = width && height ? `${width}×${height} мм` : "—";
 
     const baseDraft = {
-      material: material ? material.label : "",
+      material: labels.material ? labels.material.label : "",
       materialKey: selected.material,
       materialCategory: selected.materialCategory,
       size: width && height ? `${width}×${height} мм` : "",
@@ -369,119 +323,138 @@ if (calculator) {
       height: height || "",
       quantity: quantity || "",
       kindCount: kindCount || "",
-      print: print.label,
+      print: labels.print.label,
       printKey: selected.print,
-      cut: cut.label,
+      cut: labels.cut.label,
       cutKey: selected.cut,
-      finish: finish.label,
+      finish: labels.finish.label,
       finishKey: selected.finish,
       total: "",
-      unit: "",
-      summaryParts
+      unit: ""
     };
 
-    if (!material) {
+    if (!labels.material) {
+      setSelectionSummary(buildSummaryParts({ width, height, quantity, kindCount, labels, approximate: false }));
       saveOrderDraft(baseDraft);
       totalNode.textContent = "Оберіть матеріал для друку";
       unitNode.textContent = "—";
       materialLabel.textContent = "не вибрано";
       setBreakdown([]);
-      summaryNode.innerHTML = [
+      setSummaryLines([
         "Матеріал: не вибрано",
-        `Друк: ${print.label}`,
-        `Порізка: ${cut.label}`,
-          `Покриття: ${finish.label}`,
-          `Тираж: ${quantity.toLocaleString("uk-UA")} шт`,
-          `Різних видів: ${kindCount}`
-      ].map((line) => `<div>${line}</div>`).join("");
+        labels.print.label ? `Друк: ${labels.print.label}` : "",
+        labels.cut.label ? `Порізка: ${labels.cut.label}` : "",
+        labels.finish.label ? `Покриття: ${labels.finish.label}` : ""
+      ].filter(Boolean));
       return;
     }
+
+    materialLabel.textContent = labels.material.label;
 
     if (!width || !height || !quantity || !kindCount) {
-      saveOrderDraft({ ...baseDraft, material: material.label });
+      setSelectionSummary(buildSummaryParts({ width, height, quantity, kindCount, labels, approximate: false }));
+      saveOrderDraft(baseDraft);
       totalNode.textContent = "Заповніть розміри, тираж і види";
       unitNode.textContent = "—";
-      materialLabel.textContent = material.label;
       setBreakdown([]);
-      summaryNode.innerHTML = [
-        `Матеріал: ${material.label}`,
-        `Друк: ${print.label}`,
-        `Порізка: ${cut.label}`,
-        `Покриття: ${finish.label}`,
-        `Тираж: ${quantity ? `${quantity.toLocaleString("uk-UA")} шт` : "не вказано"}`,
-        `Різних видів: ${kindCount || "не вказано"}`,
-        `Розмір: ${width && height ? `${width}×${height} мм` : "не вказано"}`
-      ].map((line) => `<div>${line}</div>`).join("");
+      setSummaryLines([
+        `Матеріал: ${labels.material.label}`,
+        labels.print.label ? `Друк: ${labels.print.label}` : "",
+        labels.cut.label ? `Порізка: ${labels.cut.label}` : "",
+        labels.finish.label ? `Покриття: ${labels.finish.label}` : "",
+        totalQuantity ? `Загальний тираж: ${totalQuantity.toLocaleString("uk-UA")} шт` : "Загальний тираж: не вказано",
+        quantity ? `На 1 вид: ${quantity.toLocaleString("uk-UA")} шт` : "На 1 вид: не вказано",
+        kindCount ? `Різних видів: ${kindCount}` : "Різних видів: не вказано",
+        width && height ? `Розмір: ${width}×${height} мм` : "Розмір: не вказано"
+      ].filter(Boolean));
       return;
     }
 
-    const pricingMaterial = materialPricing[selected.material] || {};
-    const profile = sheetProfiles[pricingMaterial.profile] || null;
-    if (!profile) {
-      saveOrderDraft({ ...baseDraft, material: material.label });
-      totalNode.textContent = "Немає даних по матеріалу";
+    const result = calculatorEngine.calculate({
+      width,
+      height,
+      quantity,
+      kindCount,
+      materialKey: selected.material,
+      printKey: selected.print,
+      cutKey: selected.cut,
+      finishKey: selected.finish
+    }, pricingData);
+
+    setSelectionSummary(buildSummaryParts({
+      width,
+      height,
+      quantity,
+      kindCount,
+      labels,
+      approximate: !!result.materialStatus?.isApproximate
+    }));
+
+    if (!result.ok) {
+      saveOrderDraft({ ...baseDraft, material: labels.material.label });
+      totalNode.textContent = result.message;
       unitNode.textContent = "—";
-      materialLabel.textContent = material.label;
       setBreakdown([]);
-      summaryNode.innerHTML = "<div>Для цього матеріалу ще не задані параметри листа.</div>";
+      setSummaryLines([
+        `Матеріал: ${labels.material.label}`,
+        result.message
+      ]);
       return;
     }
 
-    const technicalWidth = width + profile.cutMargin * 2;
-    const technicalHeight = height + profile.cutMargin * 2;
-    const itemsPerSheet = getFitCount(profile.printWidth, profile.printHeight, technicalWidth, technicalHeight);
-    const qtyPerKind = Math.ceil(quantity / kindCount);
-    const sheetsPerKind = itemsPerSheet > 0 ? Math.ceil(qtyPerKind / itemsPerSheet) : 0;
-    const totalSheets = sheetsPerKind * kindCount;
-    const sheetCost = pricingMaterial.sheetCost || 0;
-    const printConfig = pricingMaterial.printOverrides?.[selected.print] || printPricing[selected.print] || {};
-    const cutConfig = cutPricing[selected.cut] || cutPricing.trim || {};
-    const finishConfig = finishPricing[selected.finish] || {};
-    const printCharge = getVolumeCharge(printConfig, totalSheets);
-    const cutCharge = getVolumeCharge(cutConfig, totalSheets);
-    const finishCharge = getVolumeCharge(finishConfig, totalSheets);
-    const materialCharge = totalSheets * sheetCost;
-    const formatMinimumTotal = getFormatMinimumTotal(cutConfig, width, height);
-    const total = Math.max(materialCharge + printCharge + cutCharge + finishCharge, formatMinimumTotal);
+    const totalText = result.materialStatus.isApproximate ? `≈ ${roundMoney(result.total)}` : roundMoney(result.total);
+    const safeUnitBase = Math.max(1, totalQuantity || quantity || 1);
+    const unitText = result.materialStatus.isApproximate ? `≈ ${formatUnit(result.total / safeUnitBase)}` : formatUnit(result.total / safeUnitBase);
+    const noteLine = result.materialStatus.note || "";
+    const printTier = result.printCharge.tier;
+    const printTierLabel = printTier
+      ? (printTier.maxSheets === Infinity ? `${printTier.minSheets || 101}+` : `${printTier.minSheets || 1}-${printTier.maxSheets}`)
+      : "";
 
-    totalNode.textContent = roundMoney(total);
-    unitNode.textContent = formatUnit(total / quantity);
-    materialLabel.textContent = material.label;
+    totalNode.textContent = totalText;
+    unitNode.textContent = unitText;
+    setBreakdown([
+      { label: "Матеріал", value: roundMoney(result.materialCharge.amount) },
+      { label: "Друк", value: roundMoney(result.printCharge.amount) },
+      { label: "Порізка", value: roundMoney(result.cutCharge.amount) },
+      { label: "Покриття", value: roundMoney(result.finishCharge.amount) },
+      { label: "Разом", value: roundMoney(result.total) }
+    ]);
+    setSummaryLines([
+      `Матеріал: ${labels.material.label}`,
+      `Профіль листа: ${result.profile.label} ${result.profile.stockWidth}×${result.profile.stockHeight} мм`,
+      `Робоча область: ${result.profile.printWidth}×${result.profile.printHeight} мм`,
+      `Технічний розмір стікера: ${result.itemWidth}×${result.itemHeight} мм`,
+      totalQuantity ? `Загальний тираж: ${totalQuantity.toLocaleString("uk-UA")} шт` : "",
+      quantity ? `На 1 вид: ${quantity.toLocaleString("uk-UA")} шт` : "",
+      kindCount ? `Різних видів: ${kindCount}` : "",
+      `На лист вміщується: ${result.itemsPerSheet} шт`,
+      `Всього листів: ${result.sheets.totalSheets}`,
+      `Матеріал за лист: ${formatMoney(result.materialCharge.baseMaterialPerSheet)}`,
+      `Друк за лист: ${formatMoney(result.printCharge.ratePerSheet)}`,
+      result.cutCharge.contourLengthPerItemMm
+        ? `Плотерний різ на 1 виріб: ${Math.round(result.cutCharge.contourLengthPerItemMm)} мм`
+        : "",
+      result.cutCharge.contourLengthTotalMm
+        ? `Загальна довжина різу: ${(result.cutCharge.contourLengthTotalMm / 1000).toFixed(2).replace(".", ",")} м`
+        : "",
+      result.cutCharge.contourMarginMm
+        ? `Стандартні поля під обріз: ${result.cutCharge.contourMarginMm} мм`
+        : "",
+      printTierLabel ? `Сходинка друку: ${printTierLabel} листів` : "",
+      noteLine ? `Примітка: ${noteLine}` : ""
+    ].filter(Boolean));
     saveOrderDraft({
       ...baseDraft,
-      material: material.label,
-      total: roundMoney(total),
-      unit: formatUnit(total / quantity),
-      itemsPerSheet,
-      sheetsPerKind,
-      totalSheets
+      material: labels.material.label,
+      total: totalText,
+      unit: unitText,
+      totalQuantity: totalQuantity || "",
+      itemsPerSheet: result.itemsPerSheet,
+      sheetsPerKind: result.sheets.sheetsPerKind,
+      totalSheets: result.sheets.totalSheets,
+      pricingNote: noteLine
     });
-    setBreakdown([
-      { label: "Матеріал", value: roundMoney(materialCharge) },
-      { label: "Друк", value: roundMoney(printCharge) },
-      { label: "Порізка", value: roundMoney(cutCharge) },
-      { label: "Покриття", value: roundMoney(finishCharge) },
-      { label: "Разом", value: roundMoney(total) }
-    ]);
-    summaryNode.innerHTML = [
-      `Матеріал: ${material.label}`,
-      `Профіль листа: ${profile.label} ${profile.stockWidth}×${profile.stockHeight} мм`,
-      `Область друку: ${profile.printWidth}×${profile.printHeight} мм`,
-      `Технічний розмір стікера: ${technicalWidth}×${technicalHeight} мм`,
-      `На лист лягає: ${itemsPerSheet} шт`,
-      `Листів на 1 вид: ${sheetsPerKind}`,
-      `Всього листів: ${totalSheets}`,
-      `Ціна листа: ${sheetCost.toFixed(2).replace(".", ",")} грн`,
-      `Матеріал разом: ${roundMoney(materialCharge)}`,
-      `Друк разом: ${roundMoney(printCharge)}`,
-      `Порізка разом: ${roundMoney(cutCharge)}`,
-      `Покриття разом: ${roundMoney(finishCharge)}`,
-      `Друк: ${print.label}`,
-      `Порізка: ${cut.label}`,
-      `Покриття: ${finish.label}`,
-      `Тираж: ${quantity.toLocaleString("uk-UA")} шт`,
-      `Різних видів: ${kindCount}`
-    ].map((line) => `<div>${line}</div>`).join("");
   };
 
   [widthNode, heightNode, quantityNode, kindCountNode].forEach((item) => {
@@ -509,11 +482,6 @@ if (orderFormPage) {
   const lastNameInput = orderFormPage.querySelector("#order-last-name");
   const emailInput = orderFormPage.querySelector("#order-email");
   const commentInput = orderFormPage.querySelector("#order-comment");
-  const designerNoteInput = orderFormPage.querySelector("#designer-note");
-  const layoutLinkInput = orderFormPage.querySelector("#layout-link");
-  const layoutFileInput = orderFormPage.querySelector("#layout-file");
-  const deliveryCityInput = orderFormPage.querySelector("#delivery-city");
-  const deliveryAddressInput = orderFormPage.querySelector("#delivery-address");
   const deliveryInputs = orderFormPage.querySelectorAll('input[name="delivery"]');
   const layoutInputs = orderFormPage.querySelectorAll('input[name="layout-state"]');
   const layoutLinkField = orderFormPage.querySelector("[data-layout-link-field]");
@@ -523,7 +491,6 @@ if (orderFormPage) {
   const deliveryAddressField = orderFormPage.querySelector("[data-delivery-address-field]");
   const summaryBox = orderFormPage.querySelector("[data-order-summary]");
   const totalBox = orderFormPage.querySelector("[data-order-total]");
-  const submitButton = orderFormPage.querySelector("[data-order-submit]");
 
   const updateLayoutState = () => {
     const selectedLayout = orderFormPage.querySelector('input[name="layout-state"]:checked')?.value;
@@ -543,13 +510,19 @@ if (orderFormPage) {
     const lines = [
       draft.material ? `Матеріал: ${draft.material}` : "Матеріал: уточнюється",
       draft.size ? `Розмір: ${draft.size}` : "Розмір: уточнюється",
-      draft.quantity ? `Тираж: ${Number(draft.quantity).toLocaleString("uk-UA")} шт` : "Тираж: уточнюється",
+      draft.totalQuantity
+        ? `Загальний тираж: ${Number(draft.totalQuantity).toLocaleString("uk-UA")} шт`
+        : draft.quantity
+          ? `Загальний тираж: ${Number(draft.quantity).toLocaleString("uk-UA")} шт`
+          : "Загальний тираж: уточнюється",
+      draft.quantity ? `На 1 вид: ${Number(draft.quantity).toLocaleString("uk-UA")} шт` : "На 1 вид: уточнюється",
       draft.kindCount ? `Різних видів: ${draft.kindCount}` : "Різних видів: 1",
       draft.print ? `Друк: ${draft.print}` : null,
       draft.cut ? `Порізка: ${draft.cut}` : null,
-      draft.finish ? `Покриття: ${draft.finish}` : null
+      draft.finish ? `Покриття: ${draft.finish}` : null,
+      draft.pricingNote ? `Примітка: ${draft.pricingNote}` : null
     ].filter(Boolean);
-    summaryBox.innerHTML = lines.map((line) => `<div>${line}</div>`).join("");
+    summaryBox.innerHTML = lines.map((line) => `<div>${escapeHtml(line)}</div>`).join("");
     totalBox.textContent = draft.total || "Ціну уточнимо після перевірки";
   };
 
@@ -580,12 +553,18 @@ if (orderFormPage) {
       "",
       draft.material ? `Матеріал: ${draft.material}` : null,
       draft.size ? `Розмір: ${draft.size}` : null,
-      draft.quantity ? `Тираж: ${Number(draft.quantity).toLocaleString("uk-UA")} шт` : null,
+      draft.totalQuantity
+        ? `Загальний тираж: ${Number(draft.totalQuantity).toLocaleString("uk-UA")} шт`
+        : draft.quantity
+          ? `Загальний тираж: ${Number(draft.quantity).toLocaleString("uk-UA")} шт`
+          : null,
+      draft.quantity ? `На 1 вид: ${Number(draft.quantity).toLocaleString("uk-UA")} шт` : null,
       draft.kindCount ? `Різних видів: ${draft.kindCount}` : null,
       draft.print ? `Друк: ${draft.print}` : null,
       draft.cut ? `Порізка: ${draft.cut}` : null,
       draft.finish ? `Покриття: ${draft.finish}` : null,
       draft.total ? `Орієнтовна ціна: ${draft.total}` : null,
+      draft.pricingNote ? `Примітка: ${draft.pricingNote}` : null,
       "",
       `Макет: ${layoutLabelMap[selectedLayout] || "Уточню"}`,
       selectedDelivery ? `Доставка: ${selectedDelivery}` : null,
@@ -594,10 +573,6 @@ if (orderFormPage) {
 
     window.location.href = `https://t.me/dsprints?text=${encodeURIComponent(message)}`;
   });
-
-  if (submitButton) {
-    submitButton.addEventListener("click", () => {});
-  }
 }
 
 const filters = document.querySelectorAll("[data-filter]");
@@ -608,7 +583,9 @@ if (filters.length && galleryItems.length) {
       filters.forEach((item) => item.classList.remove("active"));
       button.classList.add("active");
       const current = button.dataset.filter;
-      galleryItems.forEach((card) => { card.hidden = current !== "all" && card.dataset.category !== current; });
+      galleryItems.forEach((card) => {
+        card.hidden = current !== "all" && card.dataset.category !== current;
+      });
     });
   });
 }
@@ -684,9 +661,7 @@ if (lightbox && lightboxPreview && lightboxButtons.length) {
     button.addEventListener("click", () => openLightbox(button));
   });
 
-  if (lightboxClose) {
-    lightboxClose.addEventListener("click", closeLightbox);
-  }
+  if (lightboxClose) lightboxClose.addEventListener("click", closeLightbox);
 
   lightbox.addEventListener("click", (event) => {
     if (event.target === lightbox) closeLightbox();
@@ -720,8 +695,8 @@ const initRevealAnimations = () => {
     document.querySelectorAll(selector).forEach((node, index) => {
       if (node.dataset.revealReady === "true") return;
       classes.split(" ").forEach((className) => node.classList.add(className));
-        const isMobile = window.matchMedia("(max-width: 767px)").matches;
-        node.style.setProperty("--reveal-delay", `${Math.min(index * (isMobile ? 8 : 70), isMobile ? 32 : 420)}ms`);
+      const isMobile = window.matchMedia("(max-width: 767px)").matches;
+      node.style.setProperty("--reveal-delay", `${Math.min(index * (isMobile ? 8 : 70), isMobile ? 32 : 420)}ms`);
       node.dataset.revealReady = "true";
       nodes.push(node);
     });
@@ -741,10 +716,10 @@ const initRevealAnimations = () => {
         obs.unobserve(entry.target);
       });
     },
-      {
-        threshold: window.matchMedia("(max-width: 767px)").matches ? 0.01 : 0.14,
-        rootMargin: window.matchMedia("(max-width: 767px)").matches ? "0px 0px -12% 0px" : "0px 0px -8% 0px"
-      }
+    {
+      threshold: window.matchMedia("(max-width: 767px)").matches ? 0.01 : 0.14,
+      rootMargin: window.matchMedia("(max-width: 767px)").matches ? "0px 0px -12% 0px" : "0px 0px -8% 0px"
+    }
   );
 
   nodes.forEach((node) => observer.observe(node));
