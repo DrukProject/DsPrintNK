@@ -1,6 +1,75 @@
 const header = document.querySelector("[data-header]");
 const navToggle = document.querySelector("[data-nav-toggle]");
 const navMenu = document.querySelector("[data-nav-menu]");
+const root = document.documentElement;
+const THEME_STORAGE_KEY = "dsprintTheme";
+const systemThemeQuery = window.matchMedia ? window.matchMedia("(prefers-color-scheme: dark)") : null;
+
+const getStoredTheme = () => {
+  try {
+    return window.localStorage.getItem(THEME_STORAGE_KEY);
+  } catch {
+    return null;
+  }
+};
+
+const getPreferredTheme = () => {
+  const storedTheme = getStoredTheme();
+  if (storedTheme === "dark" || storedTheme === "light") return storedTheme;
+  return systemThemeQuery?.matches ? "dark" : "light";
+};
+
+const applyTheme = (theme) => {
+  root.dataset.theme = theme;
+  root.style.colorScheme = theme;
+  document.querySelectorAll("[data-theme-toggle]").forEach((button) => {
+    const nextTheme = theme === "dark" ? "light" : "dark";
+    button.dataset.nextTheme = nextTheme;
+    button.setAttribute("aria-label", theme === "dark" ? "Увімкнути світлу тему" : "Увімкнути темну тему");
+    const labelNode = button.querySelector("[data-theme-label]");
+    if (labelNode) labelNode.textContent = theme === "dark" ? "Світла" : "Темна";
+  });
+};
+
+const persistTheme = (theme) => {
+  try {
+    window.localStorage.setItem(THEME_STORAGE_KEY, theme);
+  } catch {}
+};
+
+const createThemeToggle = () => {
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = "theme-toggle";
+  button.dataset.themeToggle = "true";
+  button.innerHTML = `
+    <span class="theme-toggle-icon" aria-hidden="true"></span>
+    <span class="theme-toggle-label" data-theme-label>Темна</span>
+  `;
+  button.addEventListener("click", () => {
+    const nextTheme = button.dataset.nextTheme || "dark";
+    persistTheme(nextTheme);
+    applyTheme(nextTheme);
+  });
+  return button;
+};
+
+const injectThemeToggles = () => {
+  document.querySelectorAll(".nav-links, .nav-menu").forEach((nav) => {
+    if (!nav || nav.querySelector("[data-theme-toggle]")) return;
+    nav.append(createThemeToggle());
+  });
+};
+
+applyTheme(getPreferredTheme());
+injectThemeToggles();
+
+if (systemThemeQuery) {
+  systemThemeQuery.addEventListener("change", () => {
+    if (getStoredTheme()) return;
+    applyTheme(getPreferredTheme());
+  });
+}
 
 const ensureContactFab = () => {
   let contactFab = document.querySelector(".contact-fab");
