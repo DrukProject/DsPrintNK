@@ -128,11 +128,12 @@ var(--bg);color:var(--body)}
 :root[data-theme="dark"] .select select,
 :root[data-theme="dark"] .price-lab-control input,
 :root[data-theme="dark"] .price-lab-input{background:#0f141b;color:var(--text)}
-:root[data-theme="dark"] .preset-btn{background:#1b2430;color:var(--body)}
-:root[data-theme="dark"] .option-pill{border-color:#334155;background:#1b2532;color:var(--body)}
+:root[data-theme="dark"] .preset-btn{border-color:rgba(255,77,0,.22);background:rgba(255,77,0,.14);color:#ffd8c2}
+:root[data-theme="dark"] .option-pill{border-color:rgba(255,77,0,.2);background:rgba(255,77,0,.12);color:#ffe2d1}
 :root[data-theme="dark"] .option-pill.active,
 :root[data-theme="dark"] .check-pill:hover,
-:root[data-theme="dark"] .theme-toggle:hover{background:#202a38}
+:root[data-theme="dark"] .theme-toggle:hover{background:rgba(255,77,0,.2)}
+:root[data-theme="dark"] .option-pill.active{background:rgba(255,77,0,.22);box-shadow:inset 0 0 0 1px rgba(255,140,92,.28)}
 :root[data-theme="dark"] .calc-result[data-tone="warning"]{background:linear-gradient(180deg,#161b22 0%,#231b18 100%);border-color:rgba(255,77,0,.24)}
 :root[data-theme="dark"] .calc-result[data-tone="warning"] strong[data-total]{background:rgba(255,77,0,.1);border-color:rgba(255,77,0,.22);color:#ffbf99}
 :root[data-theme="dark"] .calc-result[data-tone="warning"] .price-inline b{color:#ffbf99}
