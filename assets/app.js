@@ -154,6 +154,22 @@ if (calculator && window.StickerSheetCalculator) {
     } catch {}
   };
 
+  const sanitizeDigits = (value) => String(value || "").replace(/\D+/g, "");
+  const bindDigitsOnlyInput = (node) => {
+    if (!node) return;
+
+    node.addEventListener("beforeinput", (event) => {
+      if (!event.data) return;
+      if (/^\d+$/.test(event.data)) return;
+      event.preventDefault();
+    });
+
+    node.addEventListener("input", () => {
+      const sanitized = sanitizeDigits(node.value);
+      if (node.value !== sanitized) node.value = sanitized;
+    });
+  };
+
   const getInputValue = (node) => {
     if (node.value === "") return null;
     const raw = Number(node.value);
@@ -319,6 +335,8 @@ if (calculator && window.StickerSheetCalculator) {
       calculate();
     });
   });
+
+  [widthNode, heightNode, quantityNode, kindCountNode].forEach(bindDigitsOnlyInput);
 
   const calculate = () => {
     syncFinishAvailability();
@@ -501,6 +519,11 @@ if (orderFormPage) {
   const lastNameInput = orderFormPage.querySelector("#order-last-name");
   const emailInput = orderFormPage.querySelector("#order-email");
   const commentInput = orderFormPage.querySelector("#order-comment");
+  const designerNoteInput = orderFormPage.querySelector("#designer-note");
+  const layoutLinkInput = orderFormPage.querySelector("#layout-link");
+  const layoutFileInput = orderFormPage.querySelector("#layout-file");
+  const deliveryCityInput = orderFormPage.querySelector("#delivery-city");
+  const deliveryAddressInput = orderFormPage.querySelector("#delivery-address");
   const deliveryInputs = orderFormPage.querySelectorAll('input[name="delivery"]');
   const layoutInputs = orderFormPage.querySelectorAll('input[name="layout-state"]');
   const layoutLinkField = orderFormPage.querySelector("[data-layout-link-field]");
@@ -548,6 +571,68 @@ if (orderFormPage) {
   renderOrderSummary();
   updateLayoutState();
   updateDeliveryState();
+
+  if (phoneInput) {
+    phoneInput.addEventListener("input", () => {
+      const raw = String(phoneInput.value || "");
+      const sanitized = raw
+        .replace(/[^\d+]/g, "")
+        .replace(/\+(?=.+\+)/g, "")
+        .replace(/(?!^)\+/g, "");
+      if (phoneInput.value !== sanitized) phoneInput.value = sanitized;
+    });
+  }
+
+  orderFormPage.addEventListener("submit", (event) => {
+    event.preventDefault();
+    event.stopImmediatePropagation();
+
+    const selectedDelivery =
+      orderFormPage.querySelector('input[name="delivery"]:checked')?.nextElementSibling?.textContent?.trim() || "Уточню";
+    const selectedLayout = orderFormPage.querySelector('input[name="layout-state"]:checked')?.value || "designer";
+    const layoutLabelMap = {
+      designer: "Файлу немає, потрібна допомога дизайнера",
+      link: "Додасть посилання на файл",
+      upload: "Додає файли"
+    };
+    const uploadedFiles = layoutFileInput?.files?.length
+      ? Array.from(layoutFileInput.files).map((file) => file.name).join(", ")
+      : "";
+
+    const message = [
+      "Добрий день! Хочу оформити замовлення.",
+      firstNameInput?.value ? `Ім'я: ${firstNameInput.value}` : null,
+      lastNameInput?.value ? `Прізвище: ${lastNameInput.value}` : null,
+      phoneInput?.value ? `Телефон: ${phoneInput.value}` : null,
+      emailInput?.value ? `Email: ${emailInput.value}` : null,
+      "",
+      draft.material ? `Матеріал: ${draft.material}` : null,
+      draft.size ? `Розмір: ${draft.size}` : null,
+      draft.totalQuantity
+        ? `Загальний тираж: ${Number(draft.totalQuantity).toLocaleString("uk-UA")} шт`
+        : draft.quantity
+          ? `Загальний тираж: ${Number(draft.quantity).toLocaleString("uk-UA")} шт`
+          : null,
+      draft.quantity ? `На 1 вид: ${Number(draft.quantity).toLocaleString("uk-UA")} шт` : null,
+      draft.kindCount ? `Різних видів: ${draft.kindCount}` : null,
+      draft.print ? `Друк: ${draft.print}` : null,
+      draft.cut ? `Порізка: ${draft.cut}` : null,
+      draft.finish ? `Покриття: ${draft.finish}` : null,
+      draft.total ? `Орієнтовна ціна: ${draft.total}` : null,
+      draft.pricingNote ? `Примітка: ${draft.pricingNote}` : null,
+      "",
+      `Макет: ${layoutLabelMap[selectedLayout] || "Уточню"}`,
+      selectedLayout === "designer" && designerNoteInput?.value ? `Завдання дизайнеру: ${designerNoteInput.value}` : null,
+      selectedLayout === "link" && layoutLinkInput?.value ? `Посилання на макет: ${layoutLinkInput.value}` : null,
+      selectedLayout === "upload" && uploadedFiles ? `Файли: ${uploadedFiles}` : null,
+      selectedDelivery ? `Доставка: ${selectedDelivery}` : null,
+      deliveryCityInput?.value ? `Місто: ${deliveryCityInput.value}` : null,
+      deliveryAddressInput?.value ? `Адреса / відділення: ${deliveryAddressInput.value}` : null,
+      commentInput?.value ? `Коментар: ${commentInput.value}` : null
+    ].filter(Boolean).join("\n");
+
+    window.location.href = `https://t.me/dsprints?text=${encodeURIComponent(message)}`;
+  }, true);
 
   layoutInputs.forEach((input) => input.addEventListener("change", updateLayoutState));
   deliveryInputs.forEach((input) => input.addEventListener("change", updateDeliveryState));

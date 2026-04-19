@@ -40,9 +40,9 @@
             <div class="toolbar-box">
               <label for="customWidth">розміри</label>
               <div class="toolbar-inline">
-                <input id="customWidth" type="number" min="20" max="320" value="210">
+                <input id="customWidth" type="text" inputmode="numeric" pattern="[0-9]*" min="20" max="320" value="210" autocomplete="off">
                 <span>x</span>
-                <input id="customHeight" type="number" min="20" max="450" value="297">
+                <input id="customHeight" type="text" inputmode="numeric" pattern="[0-9]*" min="20" max="450" value="297" autocomplete="off">
                 <strong>мм</strong>
               </div>
               <div class="preset-row">
@@ -57,7 +57,7 @@
               <label for="quantity">тираж</label>
               <div class="toolbar-inline">
                 <button type="button" class="step-btn" data-step-target="quantity" data-step="-1">−</button>
-                <input id="quantity" type="number" min="1" max="50000" step="1" value="100">
+                <input id="quantity" type="text" inputmode="numeric" pattern="[0-9]*" min="1" max="50000" step="1" value="100" autocomplete="off">
                 <button type="button" class="step-btn" data-step-target="quantity" data-step="1">+</button>
                 <strong>шт</strong>
               </div>
@@ -66,7 +66,7 @@
               <label for="kindCount">різних видів</label>
               <div class="toolbar-inline">
                 <button type="button" class="step-btn" data-step-target="kindCount" data-step="-1">−</button>
-                <input id="kindCount" type="number" min="1" max="100" step="1" value="1">
+                <input id="kindCount" type="text" inputmode="numeric" pattern="[0-9]*" min="1" max="100" step="1" value="1" autocomplete="off">
                 <button type="button" class="step-btn" data-step-target="kindCount" data-step="1">+</button>
               </div>
             </div>
