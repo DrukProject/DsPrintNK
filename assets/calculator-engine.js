@@ -210,9 +210,43 @@
 
   const getMaterialConfig = (data, materialKey) => data?.materials?.[materialKey] || null;
   const getSheetProfile = (data, profileKey) => data?.sheetProfiles?.[profileKey] || null;
+  const getResolvedSheetProfile = (data, materialConfig) => {
+    const baseProfile = getSheetProfile(data, materialConfig?.profile) || null;
+    const override = materialConfig?.sheetProfileOverride;
+    if (!override) return baseProfile;
+    return {
+      ...(baseProfile || {}),
+      ...override
+    };
+  };
   const getPrintConfig = (data, printKey) => data?.printModes?.[printKey] || null;
+  const getResolvedPrintConfig = (data, materialConfig, printKey) => {
+    const baseConfig = getPrintConfig(data, printKey) || null;
+    const override = materialConfig?.printOverrides?.[printKey];
+    if (!override) return baseConfig;
+    return {
+      ...(baseConfig || {}),
+      ...override
+    };
+  };
   const getCutConfig = (data, cutKey) => data?.cutModes?.[cutKey] || null;
   const getFinishConfig = (data, finishKey) => data?.finishModes?.[finishKey] || null;
+  const disallowsReferenceForCut = (materialConfig, cutKey) => {
+    const denylist = materialConfig?.disableReferenceForCuts;
+    if (!Array.isArray(denylist) || !denylist.length) return false;
+    return denylist.includes(cutKey);
+  };
+  const allowsReferenceForCut = (materialConfig, cutKey) => {
+    if (disallowsReferenceForCut(materialConfig, cutKey)) return false;
+    const allowlist = materialConfig?.referenceCutAllowlist;
+    if (!Array.isArray(allowlist) || !allowlist.length) return true;
+    return allowlist.includes(cutKey);
+  };
+  const allowsReferenceApproximationForCut = (materialConfig, cutKey) => {
+    const denylist = materialConfig?.disableReferenceApproximationForCuts;
+    if (!Array.isArray(denylist) || !denylist.length) return true;
+    return !denylist.includes(cutKey);
+  };
   const getExactReferenceTotal = ({ width, height, quantity, materialKey, printKey, finishKey, cutKey }) => {
     const sizeKeys = [`${width}x${height}`];
     const rotatedSizeKey = `${height}x${width}`;
@@ -272,13 +306,97 @@
       })
       .filter(Boolean);
 
-    if (!points.length) return null;
+    if (points.length < 2) return null;
 
     return getCurveValue({
       scaleValue: safeQuantity,
       points,
       scaleKey: "quantity"
     });
+  };
+  const getReferenceSeriesLinearTotal = ({ width, height, quantity, materialKey, printKey, finishKey, cutKey }) => {
+    const safeQuantity = Math.max(0, Math.ceil(quantity || 0));
+    if (!safeQuantity) return null;
+
+    const exact = getExactReferenceTotal({ width, height, quantity: safeQuantity, materialKey, printKey, finishKey, cutKey });
+    if (Number.isFinite(exact)) return exact;
+
+    let overrides = {};
+    try {
+      const raw = window.localStorage?.getItem("dsprintDpiPriceOverrides");
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (parsed && typeof parsed === "object") overrides = parsed;
+      }
+    } catch {
+      overrides = {};
+    }
+
+    const reference = window.DPI_PRICE_REFERENCE || {};
+    const merged = { ...reference, ...overrides };
+    const prefix = [materialKey, `${width}x${height}`, printKey, finishKey, cutKey].join("|") + "|";
+    const points = Object.entries(merged)
+      .filter(([key, value]) => key.startsWith(prefix) && Number.isFinite(value))
+      .map(([key, value]) => {
+        const quantityPart = Number(key.slice(prefix.length));
+        return Number.isFinite(quantityPart) ? { quantity: quantityPart, total: value } : null;
+      })
+      .filter(Boolean)
+      .sort((a, b) => a.quantity - b.quantity);
+
+    if (points.length < 2) return null;
+    if (safeQuantity <= points[0].quantity) return points[0].total;
+
+    for (let index = 1; index < points.length; index += 1) {
+      const prev = points[index - 1];
+      const next = points[index];
+      if (safeQuantity > next.quantity) continue;
+      return prev.total + ((next.total - prev.total) * (safeQuantity - prev.quantity)) / Math.max(next.quantity - prev.quantity, 1);
+    }
+
+    const last = points[points.length - 1];
+    const prev = points[points.length - 2] || last;
+    const tailRate = (last.total - prev.total) / Math.max(last.quantity - prev.quantity, 1);
+    return last.total + (safeQuantity - last.quantity) * tailRate;
+  };
+  const getReferenceSeriesCeilingTotal = ({ width, height, quantity, materialKey, printKey, finishKey, cutKey }) => {
+    const safeQuantity = Math.max(0, Math.ceil(quantity || 0));
+    if (!safeQuantity) return null;
+
+    const exact = getExactReferenceTotal({ width, height, quantity: safeQuantity, materialKey, printKey, finishKey, cutKey });
+    if (Number.isFinite(exact)) return exact;
+
+    let overrides = {};
+    try {
+      const raw = window.localStorage?.getItem("dsprintDpiPriceOverrides");
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (parsed && typeof parsed === "object") overrides = parsed;
+      }
+    } catch {
+      overrides = {};
+    }
+
+    const reference = window.DPI_PRICE_REFERENCE || {};
+    const merged = { ...reference, ...overrides };
+    const prefix = [materialKey, `${width}x${height}`, printKey, finishKey, cutKey].join("|") + "|";
+    const points = Object.entries(merged)
+      .filter(([key, value]) => key.startsWith(prefix) && Number.isFinite(value))
+      .map(([key, value]) => {
+        const quantityPart = Number(key.slice(prefix.length));
+        return Number.isFinite(quantityPart) ? { quantity: quantityPart, total: value } : null;
+      })
+      .filter(Boolean)
+      .sort((a, b) => a.quantity - b.quantity);
+
+    if (points.length < 2) return null;
+    const nextPoint = points.find((point) => safeQuantity <= point.quantity);
+    if (nextPoint) return nextPoint.total;
+
+    const last = points[points.length - 1];
+    const prev = points[points.length - 2] || last;
+    const tailRate = (last.total - prev.total) / Math.max(last.quantity - prev.quantity, 1);
+    return last.total + (safeQuantity - last.quantity) * tailRate;
   };
   const parseSizeKey = (value) => {
     const match = /^(\d+)x(\d+)$/.exec(String(value || "").trim());
@@ -483,7 +601,11 @@
       return formulaTotal;
     }
 
-    if (Number.isFinite(cutCharge?.smallItemRunSurcharge) && cutCharge.smallItemRunSurcharge > 0) {
+    if (
+      input.materialKey === "paperSlits" &&
+      Number.isFinite(cutCharge?.smallItemRunSurcharge) &&
+      cutCharge.smallItemRunSurcharge > 0
+    ) {
       return formulaTotal;
     }
 
@@ -730,9 +852,13 @@
     return match?.total ?? 0;
   };
   const getSmallItemRunSurcharge = ({ width, height, quantity, sheets, cutConfig, materialKey }) => {
-    const pricing = cutConfig?.smallItemRunPricing;
-    if (!pricing) return 0;
-    if (Array.isArray(pricing.materialKeys) && !pricing.materialKeys.includes(materialKey)) return 0;
+      const basePricing = cutConfig?.smallItemRunPricing;
+      if (!basePricing) return 0;
+      const pricing = basePricing?.materialOverrides?.[materialKey]
+        ? { ...basePricing, ...basePricing.materialOverrides[materialKey] }
+        : basePricing;
+      if (!pricing) return 0;
+      if (Array.isArray(pricing.materialKeys) && !pricing.materialKeys.includes(materialKey)) return 0;
 
     const itemArea = Math.max(1, width * height);
     const fullRateMaxArea = Math.max(1, pricing.fullRateMaxArea ?? 0);
@@ -905,19 +1031,202 @@
     return Math.max(floorRate, Math.min(maxRate, floorRate + extraRate));
   };
 
-  const getCutCharge = ({ width, height, quantity, sheets, itemsPerSheet, cutConfig, profile, contourLengthMm, materialKey, printKey }) => {
+  const getSimpleBucketCutCharge = ({ totalSheets, itemsPerSheet, width, height, simpleBucketPricing }) => {
+    if (!simpleBucketPricing) return null;
+
+    const safeItemsPerSheet = Math.max(1, Math.floor(itemsPerSheet || 1));
+    const safeSheets = Math.max(1, normalizeSheetCount(totalSheets));
+    const shortSide = Math.max(1, Math.min(width || 0, height || 0));
+    const longSide = Math.max(shortSide, Math.max(width || 0, height || 0));
+    const aspectRatio = longSide / shortSide;
+    const bucket = [...(simpleBucketPricing.buckets || [])]
+      .sort((left, right) => (left.maxItemsPerSheet ?? Infinity) - (right.maxItemsPerSheet ?? Infinity))
+      .find((entry) => safeItemsPerSheet <= (entry.maxItemsPerSheet ?? Infinity));
+    if (!bucket || !Number.isFinite(bucket.total)) return null;
+
+    const sheetSurcharge = [...(simpleBucketPricing.sheetSurcharges || [])]
+      .sort((left, right) => (left.minSheets ?? 0) - (right.minSheets ?? 0))
+      .reduce((total, entry) => (safeSheets >= (entry.minSheets ?? Infinity) ? entry.total ?? total : total), 0);
+
+    const aspectSurcharge = [...(simpleBucketPricing.aspectSurcharges || [])]
+      .sort((left, right) => (left.minAspectRatio ?? 0) - (right.minAspectRatio ?? 0))
+      .reduce((total, entry) => (aspectRatio >= (entry.minAspectRatio ?? Infinity) ? entry.total ?? total : total), 0);
+
+    return {
+      amount: bucket.total + sheetSurcharge + aspectSurcharge,
+      bucketTotal: bucket.total,
+      sheetSurcharge,
+      aspectSurcharge
+    };
+  };
+
+  const getSimpleContourCutCharge = ({
+    width,
+    height,
+    quantity,
+    itemsPerSheet,
+    sheets,
+    contourLengthMm,
+    simpleContourPricing
+  }) => {
+    if (!simpleContourPricing) return null;
+
+    const area = Math.max(1, (width || 0) * (height || 0));
+    const shortSide = Math.max(1, Math.min(width || 0, height || 0));
+    const longSide = Math.max(shortSide, Math.max(width || 0, height || 0));
+    const aspectRatio = longSide / shortSide;
+    const safeItemsPerSheet = Math.max(1, Math.floor(itemsPerSheet || 1));
+    const safeSheets = Math.max(1, normalizeSheetCount(sheets));
+
+    const longNarrowBucket = [...(simpleContourPricing.longNarrowBuckets || [])]
+      .sort((left, right) => (left.minAspectRatio ?? 0) - (right.minAspectRatio ?? 0))
+      .find((entry) =>
+        aspectRatio >= (entry.minAspectRatio ?? 0) &&
+        safeItemsPerSheet <= (entry.maxItemsPerSheet ?? Infinity)
+      );
+    if (longNarrowBucket && (Number.isFinite(longNarrowBucket.total) || Number.isFinite(longNarrowBucket.baseTotal))) {
+      const amount = Number.isFinite(longNarrowBucket.total)
+        ? longNarrowBucket.total
+        : (longNarrowBucket.baseTotal ?? 0) + safeSheets * (longNarrowBucket.ratePerSheet ?? 0);
+      return {
+        amount,
+        fixedCharge: 0,
+        pricePerMeter: 0,
+        contourLengthPerItemMm: contourLengthMm?.perItemMm ?? 0,
+        contourLengthTotalMm: contourLengthMm?.totalMm ?? 0,
+        contourMarginMm: contourLengthMm?.contourMarginMm ?? 0,
+        densitySurcharge: 0,
+        largeFormatBucketTotal: 0
+      };
+    }
+
+    const balancedMediumBucket = [...(simpleContourPricing.balancedMediumBuckets || [])]
+      .find((entry) =>
+        area >= (entry.minArea ?? 0) &&
+        area <= (entry.maxArea ?? Infinity) &&
+        safeItemsPerSheet >= (entry.minItemsPerSheet ?? 0) &&
+        safeItemsPerSheet <= (entry.maxItemsPerSheet ?? Infinity) &&
+        aspectRatio <= (entry.maxAspectRatio ?? Infinity)
+      );
+    if (balancedMediumBucket && Number.isFinite(balancedMediumBucket.total)) {
+      return {
+        amount: balancedMediumBucket.total,
+        fixedCharge: 0,
+        pricePerMeter: 0,
+        contourLengthPerItemMm: contourLengthMm?.perItemMm ?? 0,
+        contourLengthTotalMm: contourLengthMm?.totalMm ?? 0,
+        contourMarginMm: contourLengthMm?.contourMarginMm ?? 0,
+        densitySurcharge: 0,
+        largeFormatBucketTotal: 0
+      };
+    }
+
+    const mediumFormatBucket = [...(simpleContourPricing.mediumFormatBuckets || [])]
+      .sort((left, right) => (left.maxItemsPerSheet ?? Infinity) - (right.maxItemsPerSheet ?? Infinity))
+      .find((entry) =>
+        area >= (entry.minArea ?? 0) &&
+        area <= (entry.maxArea ?? Infinity) &&
+        safeItemsPerSheet <= (entry.maxItemsPerSheet ?? Infinity)
+      );
+    if (mediumFormatBucket && (Number.isFinite(mediumFormatBucket.total) || Number.isFinite(mediumFormatBucket.baseTotal))) {
+      const amount = Number.isFinite(mediumFormatBucket.total)
+        ? mediumFormatBucket.total
+        : (mediumFormatBucket.baseTotal ?? 0) + safeSheets * (mediumFormatBucket.ratePerSheet ?? 0);
+      return {
+        amount,
+        fixedCharge: 0,
+        pricePerMeter: 0,
+        contourLengthPerItemMm: contourLengthMm?.perItemMm ?? 0,
+        contourLengthTotalMm: contourLengthMm?.totalMm ?? 0,
+        contourMarginMm: contourLengthMm?.contourMarginMm ?? 0,
+        densitySurcharge: 0,
+        largeFormatBucketTotal: 0
+      };
+    }
+
+    const largeFormatBucket = [...(simpleContourPricing.largeFormatBuckets || [])]
+      .sort((left, right) => (left.maxItemsPerSheet ?? Infinity) - (right.maxItemsPerSheet ?? Infinity))
+      .find((entry) =>
+        area >= (entry.minArea ?? 0) &&
+        safeItemsPerSheet <= (entry.maxItemsPerSheet ?? Infinity)
+      );
+    if (largeFormatBucket && (Number.isFinite(largeFormatBucket.total) || Number.isFinite(largeFormatBucket.baseTotal))) {
+      const amount = Number.isFinite(largeFormatBucket.total)
+        ? largeFormatBucket.total
+        : (largeFormatBucket.baseTotal ?? 0) + safeSheets * (largeFormatBucket.ratePerSheet ?? 0);
+      return {
+        amount,
+        fixedCharge: 0,
+        pricePerMeter: 0,
+        contourLengthPerItemMm: contourLengthMm?.perItemMm ?? 0,
+        contourLengthTotalMm: contourLengthMm?.totalMm ?? 0,
+        contourMarginMm: contourLengthMm?.contourMarginMm ?? 0,
+        densitySurcharge: 0,
+        largeFormatBucketTotal: amount
+      };
+    }
+
+    const totalMeters = Math.max(0, Number(contourLengthMm?.totalMm || 0) / 1000);
+    const densitySurcharge = [...(simpleContourPricing.densitySurcharges || [])]
+      .sort((left, right) => (left.minItemsPerSheet ?? 0) - (right.minItemsPerSheet ?? 0))
+      .reduce((total, entry) => (safeItemsPerSheet >= (entry.minItemsPerSheet ?? Infinity) ? entry.total ?? total : total), 0);
+
+    const amount = Math.max(
+      (simpleContourPricing.base ?? 0) + totalMeters * (simpleContourPricing.ratePerMeter ?? 0) + densitySurcharge,
+      simpleContourPricing.minTotal ?? 0
+    );
+
+    return {
+      amount,
+      fixedCharge: simpleContourPricing.base ?? 0,
+      pricePerMeter: simpleContourPricing.ratePerMeter ?? 0,
+      contourLengthPerItemMm: contourLengthMm?.perItemMm ?? 0,
+      contourLengthTotalMm: contourLengthMm?.totalMm ?? 0,
+      contourMarginMm: contourLengthMm?.contourMarginMm ?? 0,
+      densitySurcharge
+    };
+  };
+
+    const getCutCharge = ({ width, height, quantity, sheets, itemsPerSheet, cutConfig, profile, contourLengthMm, materialKey, printKey, materialConfig, cutKey }) => {
     const totalSheets = normalizeSheetCount(sheets);
     if (!cutConfig) return { amount: 0 };
+
+    const cutOverride = materialConfig?.cutOverrides?.[cutKey] || null;
+    const simpleBucketCharge = getSimpleBucketCutCharge({
+      totalSheets,
+      itemsPerSheet,
+      width,
+      height,
+      simpleBucketPricing: cutOverride?.simpleBucketPricing
+    });
+    if (simpleBucketCharge) return simpleBucketCharge;
+
+    const simpleContourLength = getContourLengthMm({ width, height, quantity, cutConfig, contourLengthMm });
+    const simpleContourCharge = getSimpleContourCutCharge({
+      width,
+      height,
+      quantity,
+      itemsPerSheet,
+      sheets: totalSheets,
+      contourLengthMm: simpleContourLength,
+      simpleContourPricing: cutOverride?.simpleContourPricing
+    });
+    if (simpleContourCharge) return simpleContourCharge;
 
     if (Number.isFinite(cutConfig.pricePerMeter) && cutConfig.pricePerMeter > 0) {
       const contourLength = getContourLengthMm({ width, height, quantity, cutConfig, contourLengthMm });
       const totalMeters = contourLength.totalMm / 1000;
       const fixedCharge = cutConfig.fixedCharge ?? 0;
       const pricePerMeter = getContourMeterRate({ quantity, sheets: totalSheets, cutConfig });
-      const amount = Math.max(
+      let amount = Math.max(
         fixedCharge + totalMeters * pricePerMeter,
         cutConfig.minCharge ?? 0
       );
+
+      const contourMultiplier = materialConfig?.cutOverrides?.digitalContour?.amountMultiplier;
+      if (Number.isFinite(contourMultiplier) && contourMultiplier > 0) {
+        amount *= contourMultiplier;
+      }
 
       return {
         amount,
@@ -1007,7 +1316,12 @@
       areaMinimum,
       densityBucketMinimum
     );
-    const amount = amountBeforeElongation + elongatedShapeSurcharge + longNarrowRunSurcharge + veryLongFormatSurcharge + longFormat300NarrowSurcharge;
+    let amount = amountBeforeElongation + elongatedShapeSurcharge + longNarrowRunSurcharge + veryLongFormatSurcharge + longFormat300NarrowSurcharge;
+
+    const genericMultiplier = materialConfig?.cutOverrides?.[cutKey]?.amountMultiplier;
+    if (Number.isFinite(genericMultiplier) && genericMultiplier > 0) {
+      amount *= genericMultiplier;
+    }
 
     return {
       amount,
@@ -1028,11 +1342,11 @@
     };
   };
 
-  const getFinishCharge = (sheets, finishConfig) => {
-    const totalSheets = normalizeSheetCount(sheets);
-    if (!finishConfig || finishConfig.mode === "none" || !totalSheets) {
-      return { amount: 0, pricePerSheet: 0 };
-    }
+    const getFinishCharge = (sheets, finishConfig) => {
+      const totalSheets = normalizeSheetCount(sheets);
+      if (!finishConfig || finishConfig.mode === "none" || !totalSheets) {
+        return { amount: 0, pricePerSheet: 0 };
+      }
 
     const fixedCharge = finishConfig.fixedCharge ?? 0;
     const pricePerSheet = finishConfig.pricePerSheet ?? 0;
@@ -1043,17 +1357,137 @@
       amount: Math.max(curveAmount + fixedCharge + pricePerSheet * totalSheets, finishConfig.minCharge ?? 0),
       curveAmount,
       fixedCharge,
-      pricePerSheet
+        pricePerSheet
+      };
     };
-  };
 
-  const getMaterialStatus = (materialConfig) => {
-    if (!materialConfig) return { canQuote: false, isApproximate: false, note: "" };
+    const getMaterialBaseAdjustment = ({
+      input,
+      width,
+      height,
+      itemsPerSheet,
+      sheets,
+      materialConfig
+    }) => {
+      const adjustments = Array.isArray(materialConfig?.baseAdjustments) ? materialConfig.baseAdjustments : [];
+      if (!adjustments.length) return 0;
+
+      const area = Math.max(1, (width || 0) * (height || 0));
+      const shortSide = Math.max(1, Math.min(width || 0, height || 0));
+      const longSide = Math.max(shortSide, Math.max(width || 0, height || 0));
+      const aspectRatio = longSide / shortSide;
+      const safeItemsPerSheet = Math.max(1, Math.floor(itemsPerSheet || 1));
+      const safeSheets = Math.max(1, normalizeSheetCount(sheets));
+
+      const match = adjustments.find((entry) =>
+        area >= (entry.minArea ?? 0) &&
+        area <= (entry.maxArea ?? Infinity) &&
+        safeItemsPerSheet >= (entry.minItemsPerSheet ?? 0) &&
+        safeItemsPerSheet <= (entry.maxItemsPerSheet ?? Infinity) &&
+        safeSheets >= (entry.minSheets ?? 0) &&
+        safeSheets <= (entry.maxSheets ?? Infinity) &&
+        aspectRatio >= (entry.minAspectRatio ?? 0) &&
+        aspectRatio <= (entry.maxAspectRatio ?? Infinity)
+      );
+      if (!match) return 0;
+
+      const printDiscount = match.printDiscounts?.[input.printKey];
+      if (Number.isFinite(printDiscount)) return printDiscount;
+      if (Number.isFinite(match.discount)) return match.discount;
+      return 0;
+    };
+  
+      const getMaterialStatus = (materialConfig) => {
+      if (!materialConfig) return { canQuote: false, isApproximate: false, note: "" };
 
     return {
       canQuote: materialConfig.canQuote !== false,
       isApproximate: !!materialConfig.isApproximate,
       note: materialConfig.note || ""
+      };
+    };
+
+  const applyDeltaPreservingNonNegativeCharges = ({
+      delta,
+      input,
+      materialCharge,
+      printCharge,
+      cutCharge,
+      finishCharge,
+      sheets,
+      finishKey
+    }) => {
+      if (!Number.isFinite(delta) || delta === 0) return;
+
+      const applyWithFallback = (charge) => {
+        const nextAmount = (charge?.amount ?? 0) + delta;
+        if (nextAmount >= 0) {
+          charge.amount = nextAmount;
+          return;
+        }
+
+        charge.amount = 0;
+        materialCharge.amount += nextAmount;
+      };
+
+      if (input.cutKey !== "trim") {
+        applyWithFallback(cutCharge);
+        return;
+      }
+
+      if (finishKey !== "none") {
+        applyWithFallback(finishCharge);
+        return;
+      }
+
+      applyWithFallback(printCharge);
+      if (sheets.totalSheets > 0) {
+        printCharge.ratePerSheet = printCharge.amount / sheets.totalSheets;
+      }
+    };
+
+  const getMaterialDigitalContourModeledTotal = ({
+    input,
+    data,
+    materialConfig,
+    finishKey,
+    cutCharge
+  }) => {
+    if (input.cutKey !== "digitalContour" || input.ignoreContourPieceTrimModel) return null;
+
+    const deltaModel = materialConfig?.cutOverrides?.digitalContour?.pieceTrimDeltaModel;
+    if (!deltaModel) return null;
+
+    const totalMeters = Number.isFinite(cutCharge?.contourLengthTotalMm)
+      ? cutCharge.contourLengthTotalMm / 1000
+      : null;
+    const perItemMeters = Number.isFinite(cutCharge?.contourLengthPerItemMm)
+      ? cutCharge.contourLengthPerItemMm / 1000
+      : null;
+    if (!Number.isFinite(totalMeters) || !Number.isFinite(perItemMeters)) return null;
+
+    const pieceTrimQuote = calculate(
+      {
+        ...input,
+        cutKey: "pieceTrim",
+        finishKey,
+        ignoreContourPieceTrimModel: true
+      },
+      data
+    );
+    if (!pieceTrimQuote?.ok || !Number.isFinite(pieceTrimQuote.total)) return null;
+
+    const contourDelta = Math.max(
+      deltaModel.minDelta ?? 0,
+      (deltaModel.base ?? 0) +
+        totalMeters * (deltaModel.totalMeters ?? 0) +
+        perItemMeters * (deltaModel.perItemMeters ?? 0)
+    );
+
+    return {
+      total: pieceTrimQuote.total + contourDelta,
+      pieceTrimQuote,
+      contourDelta
     };
   };
 
@@ -1068,8 +1502,24 @@
       };
     }
 
-    const profile = getSheetProfile(data, materialConfig.profile);
-    const cutConfig = getCutConfig(data, input.cutKey);
+    const allowedFinishes = Array.isArray(materialConfig.allowedFinishes) && materialConfig.allowedFinishes.length
+      ? new Set(materialConfig.allowedFinishes)
+      : null;
+    const finishKey = allowedFinishes && !allowedFinishes.has(input.finishKey)
+      ? "none"
+      : input.finishKey;
+    const resolvedCutKey = materialConfig?.cutAliases?.[input.cutKey] || input.cutKey;
+
+    if (materialConfig.disallowBlankDigitalContour && input.printKey === "blank" && resolvedCutKey === "digitalContour") {
+      return {
+        ok: false,
+        code: "combination-unavailable",
+        message: "Не знайдено пропозиції з такими параметрами."
+      };
+    }
+
+    const profile = getResolvedSheetProfile(data, materialConfig);
+    const cutConfig = getCutConfig(data, resolvedCutKey);
     if (!profile) {
       return {
         ok: false,
@@ -1145,7 +1595,10 @@
       };
     }
 
-    const printCharge = getPrintCharge(sheets.totalSheets, getPrintConfig(data, input.printKey));
+    const printCharge = getPrintCharge(
+      sheets.totalSheets,
+      getResolvedPrintConfig(data, materialConfig, input.printKey)
+    );
     const cutCharge = getCutCharge({
       width: input.width,
       height: input.height,
@@ -1156,58 +1609,219 @@
       profile,
       contourLengthMm: input.contourLengthMm,
       materialKey: input.materialKey,
-      printKey: input.printKey
-    });
-    const finishCharge = getFinishCharge(sheets.totalSheets, getFinishConfig(data, input.finishKey));
-    const formulaTotal = materialCharge.amount + printCharge.amount + cutCharge.amount + finishCharge.amount;
+      printKey: input.printKey,
+      materialConfig,
+      cutKey: resolvedCutKey
+      });
+      const finishCharge = getFinishCharge(sheets.totalSheets, getFinishConfig(data, finishKey));
+      const materialBaseAdjustment = getMaterialBaseAdjustment({
+        input,
+        width: input.width,
+        height: input.height,
+        itemsPerSheet,
+        sheets: sheets.totalSheets,
+        materialConfig
+      });
+      if (materialBaseAdjustment > 0) {
+        materialCharge.amount = Math.max(0, materialCharge.amount - materialBaseAdjustment);
+        if (sheets.totalSheets > 0) {
+          materialCharge.baseMaterialPerSheet = materialCharge.amount / sheets.totalSheets;
+        }
+      }
+      const formulaTotal = materialCharge.amount + printCharge.amount + cutCharge.amount + finishCharge.amount;
     let total = formulaTotal;
+    let sameSizeReferenceSeriesTotal = null;
+    let usedModeledContourTotal = false;
+    const useReferenceForCut = allowsReferenceForCut(materialConfig, resolvedCutKey);
     const exactReferenceTotal = input.ignoreExactReference
       ? null
-      : getReferenceSeriesTotal({
+      : !useReferenceForCut
+        ? null
+      : getExactReferenceTotal({
         width: input.width,
         height: input.height,
         quantity: totalRequestedQuantity,
         materialKey: input.materialKey,
         printKey: input.printKey,
-        finishKey: input.finishKey,
-        cutKey: input.cutKey
+        finishKey,
+        cutKey: resolvedCutKey
       });
 
     if (Number.isFinite(exactReferenceTotal)) {
       const delta = exactReferenceTotal - total;
-      if (input.cutKey !== "trim") {
-        cutCharge.amount += delta;
-      } else if (input.finishKey !== "none") {
-        finishCharge.amount += delta;
-      } else {
-        printCharge.amount += delta;
-        if (sheets.totalSheets > 0) {
-          printCharge.ratePerSheet = printCharge.amount / sheets.totalSheets;
-        }
-      }
+      applyDeltaPreservingNonNegativeCharges({
+        delta,
+        input,
+        materialCharge,
+        printCharge,
+        cutCharge,
+        finishCharge,
+        sheets,
+        finishKey
+      });
       total = exactReferenceTotal;
     } else if (!input.ignoreReferenceApproximation) {
-      const adjustedReferenceLikeTotal = getReferenceAdjustedTotal({
+      const modeledContour = getMaterialDigitalContourModeledTotal({
         input,
         data,
-        formulaTotal,
-        itemsPerSheet,
-        sheets: sheets.totalSheets,
+        materialConfig,
+        finishKey,
         cutCharge
       });
-      if (Number.isFinite(adjustedReferenceLikeTotal)) {
-        const delta = adjustedReferenceLikeTotal - total;
-        if (input.cutKey !== "trim") {
-          cutCharge.amount += delta;
-        } else if (input.finishKey !== "none") {
-          finishCharge.amount += delta;
-        } else {
-          printCharge.amount += delta;
-          if (sheets.totalSheets > 0) {
-            printCharge.ratePerSheet = printCharge.amount / sheets.totalSheets;
+      if (modeledContour) {
+        usedModeledContourTotal = true;
+        total = modeledContour.total;
+        materialCharge.amount = modeledContour.pieceTrimQuote.materialCharge.amount;
+        materialCharge.baseMaterialPerSheet = modeledContour.pieceTrimQuote.materialCharge.baseMaterialPerSheet;
+        materialCharge.missing = modeledContour.pieceTrimQuote.materialCharge.missing;
+        printCharge.amount = modeledContour.pieceTrimQuote.printCharge.amount;
+        if ("ratePerSheet" in modeledContour.pieceTrimQuote.printCharge) {
+          printCharge.ratePerSheet = modeledContour.pieceTrimQuote.printCharge.ratePerSheet;
+        }
+        if ("floorPerSheet" in modeledContour.pieceTrimQuote.printCharge) {
+          printCharge.floorPerSheet = modeledContour.pieceTrimQuote.printCharge.floorPerSheet;
+        }
+        if ("tier" in modeledContour.pieceTrimQuote.printCharge) {
+          printCharge.tier = modeledContour.pieceTrimQuote.printCharge.tier;
+        }
+        cutCharge.amount = modeledContour.contourDelta;
+        cutCharge.modeledFromPieceTrim = true;
+        cutCharge.modeledContourDelta = modeledContour.contourDelta;
+        finishCharge.amount = modeledContour.pieceTrimQuote.finishCharge.amount;
+      } else if (!input.ignoreReferenceApproximation && useReferenceForCut) {
+        const shouldUseLinearSameSizeReference =
+          (input.materialKey === "upmMatte" &&
+            resolvedCutKey === "pieceTrim" &&
+            itemsPerSheet <= 2) ||
+          (materialConfig?.sameSizeReferenceQuantityMode === "ceiling" && itemsPerSheet <= 2);
+        const shouldUseCeilingSameSizeReference =
+          materialConfig?.sameSizeReferenceQuantityMode === "ceiling" &&
+          !shouldUseLinearSameSizeReference;
+        const shouldSkipSameSizeReferenceSeries =
+          input.materialKey === "paperSlits" &&
+          Number.isFinite(cutCharge?.smallItemRunSurcharge) &&
+          cutCharge.smallItemRunSurcharge > 0;
+        const canUseCrossSizeReferenceApproximation =
+          allowsReferenceApproximationForCut(materialConfig, resolvedCutKey);
+        sameSizeReferenceSeriesTotal =
+          shouldSkipSameSizeReferenceSeries
+            ? null
+            : shouldUseCeilingSameSizeReference
+              ? getReferenceSeriesCeilingTotal({
+                  width: input.width,
+                  height: input.height,
+                  quantity: totalRequestedQuantity,
+                  materialKey: input.materialKey,
+                  printKey: input.printKey,
+                  finishKey,
+                  cutKey: resolvedCutKey
+                })
+            : shouldUseLinearSameSizeReference
+              ? getReferenceSeriesLinearTotal({
+                  width: input.width,
+                  height: input.height,
+                  quantity: totalRequestedQuantity,
+                  materialKey: input.materialKey,
+                  printKey: input.printKey,
+                  finishKey,
+                  cutKey: resolvedCutKey
+                })
+              : getReferenceSeriesTotal({
+                  width: input.width,
+                  height: input.height,
+                  quantity: totalRequestedQuantity,
+                  materialKey: input.materialKey,
+                  printKey: input.printKey,
+                  finishKey,
+                  cutKey: resolvedCutKey
+                });
+        const adjustedReferenceLikeTotal = Number.isFinite(sameSizeReferenceSeriesTotal)
+          ? sameSizeReferenceSeriesTotal
+          : canUseCrossSizeReferenceApproximation
+            ? getReferenceAdjustedTotal({
+                input: {
+                  ...input,
+                  finishKey,
+                  cutKey: resolvedCutKey
+                },
+                data,
+                formulaTotal,
+                itemsPerSheet,
+                sheets: sheets.totalSheets,
+                cutCharge
+              })
+            : null;
+        if (Number.isFinite(adjustedReferenceLikeTotal)) {
+          const delta = adjustedReferenceLikeTotal - total;
+          applyDeltaPreservingNonNegativeCharges({
+            delta,
+            input,
+            materialCharge,
+            printCharge,
+            cutCharge,
+            finishCharge,
+            sheets,
+            finishKey
+          });
+          total = adjustedReferenceLikeTotal;
+        }
+      }
+    }
+
+    const shouldSmoothLargeRunSheetSteps =
+      !input.ignoreSheetBandSmoothing &&
+      !Number.isFinite(exactReferenceTotal) &&
+      !Number.isFinite(sameSizeReferenceSeriesTotal) &&
+      !usedModeledContourTotal &&
+      itemsPerSheet > 0 &&
+      sheets.totalSheets > 2;
+
+    if (shouldSmoothLargeRunSheetSteps) {
+      const effectiveSheets = totalRequestedQuantity / Math.max(itemsPerSheet, 1);
+      const lowerFullSheets = Math.floor(effectiveSheets);
+      const upperFullSheets = Math.ceil(effectiveSheets);
+
+      if (upperFullSheets > lowerFullSheets && lowerFullSheets >= 2) {
+        const lowerQuantity = lowerFullSheets * itemsPerSheet;
+        const upperQuantity = upperFullSheets * itemsPerSheet;
+
+        if (totalRequestedQuantity > lowerQuantity && totalRequestedQuantity < upperQuantity) {
+          const lowerQuote = calculate(
+            {
+              ...input,
+              quantity: lowerQuantity,
+              ignoreSheetBandSmoothing: true
+            },
+            data
+          );
+          const upperQuote = calculate(
+            {
+              ...input,
+              quantity: upperQuantity,
+              ignoreSheetBandSmoothing: true
+            },
+            data
+          );
+
+          if (lowerQuote?.ok && upperQuote?.ok) {
+            const factor = (totalRequestedQuantity - lowerQuantity) / Math.max(upperQuantity - lowerQuantity, 1);
+            const mix = (start, end) => start + (end - start) * factor;
+
+            materialCharge.amount = mix(lowerQuote.materialCharge.amount, upperQuote.materialCharge.amount);
+            printCharge.amount = mix(lowerQuote.printCharge.amount, upperQuote.printCharge.amount);
+            cutCharge.amount = mix(lowerQuote.cutCharge.amount, upperQuote.cutCharge.amount);
+            finishCharge.amount = mix(lowerQuote.finishCharge.amount, upperQuote.finishCharge.amount);
+            if (sheets.totalSheets > 0) {
+              materialCharge.baseMaterialPerSheet = materialCharge.amount / sheets.totalSheets;
+              printCharge.ratePerSheet = printCharge.amount / sheets.totalSheets;
+              finishCharge.pricePerSheet = finishCharge.amount / sheets.totalSheets;
+            }
+            cutCharge.sheetBandSmoothed = true;
+            cutCharge.sheetBandLowerQuantity = lowerQuantity;
+            cutCharge.sheetBandUpperQuantity = upperQuantity;
+            total = materialCharge.amount + printCharge.amount + cutCharge.amount + finishCharge.amount;
           }
         }
-        total = adjustedReferenceLikeTotal;
       }
     }
 

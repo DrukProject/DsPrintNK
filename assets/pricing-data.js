@@ -202,13 +202,21 @@ window.PRINT_CALC_DATA = {
         { minItemsPerSheet: 9, maxItemsPerSheet: 15, total: 66 },
         { minItemsPerSheet: 16, total: 79 }
       ],
-      smallItemRunPricing: {
-        materialKeys: ["paperSlits"],
-        fullRateMaxArea: 1200,
-        taperMaxArea: 2500,
-        thresholdItemsPerUsedSheet: 23,
-        ratePerExtraItem: 14.3
-      },
+        smallItemRunPricing: {
+          materialKeys: ["paperSlits", "upmMatte"],
+          fullRateMaxArea: 1200,
+          taperMaxArea: 2500,
+          thresholdItemsPerUsedSheet: 23,
+          ratePerExtraItem: 14.3,
+          materialOverrides: {
+            upmMatte: {
+              fullRateMaxArea: 2500,
+              taperMaxArea: 4000,
+              thresholdItemsPerUsedSheet: 20,
+              ratePerExtraItem: 33.7
+            }
+          }
+        },
       mediumRunSheetPricing: {
         materialKeys: ["paperSlits"],
         maxSheets: 6,
@@ -503,63 +511,248 @@ window.PRINT_CALC_DATA = {
     },
     waterproof: {
       sheetCost: 32.8,
-      profile: "film"
+      profile: "film",
+      allowedFinishes: ["none"],
+      cutAliases: {
+        pieceTrim: "trim"
+      },
+      referenceCutAllowlist: ["trim", "digitalContour"],
+      disableReferenceApproximationForCuts: ["trim", "digitalContour"]
     },
     upmMatte: {
       sheetCost: 55.83,
-      profile: "film"
+      profile: "film",
+      sheetProfileOverride: {
+        stockWidth: 297,
+        stockHeight: 420,
+        printWidth: 297,
+        printHeight: 420,
+        cutMargin: 0,
+        gapX: 0,
+        gapY: 0
+      },
+        allowedFinishes: ["none"],
+        referenceCutAllowlist: ["trim", "pieceTrim", "digitalContour"],
+        disableReferenceApproximationForCuts: ["trim", "pieceTrim", "digitalContour"],
+        baseAdjustments: [
+          {
+            minArea: 9000,
+            maxArea: 12000,
+            minItemsPerSheet: 8,
+            maxItemsPerSheet: 10,
+            minSheets: 10,
+            maxSheets: 20,
+            maxAspectRatio: 1.15,
+            printDiscounts: {
+              blank: 160,
+              bw1: 172,
+              color1: 185
+            }
+          }
+        ],
+        cutOverrides: {
+          pieceTrim: {
+            minWidth: 7,
+            minHeight: 7,
+            simpleBucketPricing: {
+            buckets: [
+              { maxItemsPerSheet: 2, total: 26 },
+              { maxItemsPerSheet: 6, total: 34 },
+              { maxItemsPerSheet: 12, total: 48 },
+              { maxItemsPerSheet: 24, total: 66 },
+              { maxItemsPerSheet: 50, total: 86 },
+              { total: 106 }
+            ],
+            sheetSurcharges: [
+              { minSheets: 10, total: 10 },
+              { minSheets: 25, total: 18 },
+              { minSheets: 50, total: 28 },
+              { minSheets: 100, total: 42 }
+            ],
+            aspectSurcharges: [
+              { minAspectRatio: 1.7, total: 12 },
+              { minAspectRatio: 2.2, total: 24 }
+            ]
+          }
+        },
+          digitalContour: {
+            simpleContourPricing: {
+              longNarrowBuckets: [
+                { minAspectRatio: 3, maxItemsPerSheet: 12, baseTotal: 50, ratePerSheet: 12 }
+              ],
+              balancedMediumBuckets: [
+                { minArea: 9000, maxArea: 12000, minItemsPerSheet: 8, maxItemsPerSheet: 10, maxAspectRatio: 1.15, total: 2 },
+                { minArea: 5000, maxArea: 12000, minItemsPerSheet: 12, maxItemsPerSheet: 24, maxAspectRatio: 1.6, total: 2 }
+              ],
+              mediumFormatBuckets: [
+                { minArea: 5000, maxArea: 15000, maxItemsPerSheet: 24, baseTotal: 30, ratePerSheet: 6 }
+            ],
+            largeFormatBuckets: [
+              { minArea: 50000, maxItemsPerSheet: 2, baseTotal: 26, ratePerSheet: 3 },
+              { minArea: 30000, maxItemsPerSheet: 4, baseTotal: 40, ratePerSheet: 1.2 },
+              { minArea: 20000, maxItemsPerSheet: 6, baseTotal: 58, ratePerSheet: 0.8 }
+            ],
+            base: 24,
+            ratePerMeter: 1.2,
+            densitySurcharges: [
+              { minItemsPerSheet: 30, total: 12 },
+              { minItemsPerSheet: 50, total: 20 }
+            ],
+            minTotal: 35
+          }
+        }
+      },
+      curve: [
+        { sheets: 1, total: 57 },
+        { sheets: 5, total: 282 },
+        { sheets: 10, total: 563 },
+        { sheets: 25, total: 1407 },
+        { sheets: 50, total: 2814 },
+        { sheets: 100, total: 5627 },
+        { sheets: 250, total: 14107 },
+        { sheets: 500, total: 28240 },
+        { sheets: 1000, total: 56507 }
+      ],
+      printOverrides: {
+        bw1: {
+          floorPerSheet: 0,
+          curve: [
+            { sheets: 1, total: 10 },
+            { sheets: 5, total: 52 },
+            { sheets: 10, total: 83 },
+            { sheets: 25, total: 133 },
+            { sheets: 50, total: 212 },
+            { sheets: 100, total: 359 },
+            { sheets: 250, total: 696 },
+            { sheets: 500, total: 1170 },
+            { sheets: 1000, total: 2291 }
+          ]
+        },
+        color1: {
+          floorPerSheet: 0,
+          curve: [
+            { sheets: 1, total: 23 },
+            { sheets: 5, total: 97 },
+            { sheets: 10, total: 145 },
+            { sheets: 25, total: 286 },
+            { sheets: 50, total: 511 },
+            { sheets: 100, total: 925 },
+            { sheets: 250, total: 1874 },
+            { sheets: 500, total: 3212 },
+            { sheets: 1000, total: 6375 }
+          ]
+        }
+      }
     },
     ritramaWhite: {
       sheetCost: 30.454,
-      profile: "film"
+      profile: "film",
+      referenceCutAllowlist: ["trim", "pieceTrim", "digitalContour"]
     },
     ritramaClear: {
       sheetCost: 30.454,
-      profile: "film"
+      profile: "film",
+      referenceCutAllowlist: ["trim", "pieceTrim", "digitalContour"],
+      disableReferenceApproximationForCuts: ["trim", "pieceTrim", "digitalContour"]
     },
     woodstock: {
       sheetCost: 28.613,
-      profile: "paper"
+      profile: "paper",
+      allowedFinishes: ["none"],
+      cutAliases: { pieceTrim: "trim" },
+      sameSizeReferenceQuantityMode: "ceiling",
+      referenceCutAllowlist: ["trim", "pieceTrim", "digitalContour"],
+      disableReferenceApproximationForCuts: ["trim", "pieceTrim", "digitalContour"]
     },
     kraft: {
       sheetCost: 30.009,
-      profile: "paper"
+      profile: "paper",
+      allowedFinishes: ["none"],
+      cutAliases: { pieceTrim: "trim" },
+      sameSizeReferenceQuantityMode: "ceiling",
+      referenceCutAllowlist: ["trim", "pieceTrim", "digitalContour"],
+      disableReferenceApproximationForCuts: ["trim", "pieceTrim", "digitalContour"]
     },
     tintoretto: {
       sheetCost: 27.357,
-      profile: "paper"
+      profile: "paper",
+      allowedFinishes: ["none"],
+      cutAliases: { pieceTrim: "trim" },
+      sameSizeReferenceQuantityMode: "ceiling",
+      referenceCutAllowlist: ["trim", "pieceTrim", "digitalContour"],
+      disableReferenceApproximationForCuts: ["trim", "pieceTrim", "digitalContour"]
     },
     sirio: {
       sheetCost: 32.451,
-      profile: "paper"
+      profile: "paper",
+      allowedFinishes: ["none"],
+      cutAliases: { pieceTrim: "trim" },
+      sameSizeReferenceQuantityMode: "ceiling",
+      referenceCutAllowlist: ["trim", "pieceTrim", "digitalContour"],
+      disableReferenceApproximationForCuts: ["trim", "pieceTrim", "digitalContour"]
     },
     silver: {
       sheetCost: 28.264,
-      profile: "paper"
+      profile: "paper",
+      allowedFinishes: ["none"],
+      cutAliases: { pieceTrim: "trim" },
+      sameSizeReferenceQuantityMode: "ceiling",
+      referenceCutAllowlist: ["trim", "pieceTrim", "digitalContour"],
+      disableReferenceApproximationForCuts: ["trim", "pieceTrim", "digitalContour"]
     },
     embossed: {
       sheetCost: 26.38,
-      profile: "paper"
+      profile: "paper",
+      allowedFinishes: ["none"],
+      cutAliases: { pieceTrim: "trim" },
+      sameSizeReferenceQuantityMode: "ceiling",
+      referenceCutAllowlist: ["trim", "pieceTrim", "digitalContour"],
+      disableReferenceApproximationForCuts: ["trim", "pieceTrim", "digitalContour"]
     },
     snow: {
       sheetCost: 32.242,
-      profile: "paper"
+      profile: "paper",
+      allowedFinishes: ["none"],
+      cutAliases: { pieceTrim: "trim" },
+      sameSizeReferenceQuantityMode: "ceiling",
+      referenceCutAllowlist: ["trim", "pieceTrim", "digitalContour"],
+      disableReferenceApproximationForCuts: ["trim", "pieceTrim", "digitalContour"]
     },
     jade: {
       sheetCost: 34.545,
-      profile: "paper"
+      profile: "paper",
+      allowedFinishes: ["none"],
+      cutAliases: { pieceTrim: "trim" },
+      sameSizeReferenceQuantityMode: "ceiling",
+      referenceCutAllowlist: ["trim", "pieceTrim", "digitalContour"],
+      disableReferenceApproximationForCuts: ["trim", "pieceTrim", "digitalContour"]
     },
     antiquaWhite: {
       sheetCost: 27.078,
-      profile: "paper"
+      profile: "paper",
+      allowedFinishes: ["none"],
+      cutAliases: { pieceTrim: "trim" },
+      sameSizeReferenceQuantityMode: "ceiling",
+      referenceCutAllowlist: ["trim", "pieceTrim", "digitalContour"],
+      disableReferenceApproximationForCuts: ["trim", "pieceTrim", "digitalContour"]
     },
     antiquaIvory: {
       sheetCost: 27.078,
-      profile: "paper"
+      profile: "paper",
+      allowedFinishes: ["none"],
+      cutAliases: { pieceTrim: "trim" },
+      sameSizeReferenceQuantityMode: "ceiling",
+      referenceCutAllowlist: ["trim", "pieceTrim", "digitalContour"],
+      disableReferenceApproximationForCuts: ["trim", "pieceTrim", "digitalContour"]
     },
     acquerello: {
       sheetCost: 27.357,
-      profile: "paper"
+      profile: "paper",
+      allowedFinishes: ["none"],
+      cutAliases: { pieceTrim: "trim" },
+      sameSizeReferenceQuantityMode: "ceiling",
+      referenceCutAllowlist: ["trim", "pieceTrim", "digitalContour"],
+      disableReferenceApproximationForCuts: ["trim", "pieceTrim", "digitalContour"]
     }
   }
 };

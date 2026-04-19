@@ -99,9 +99,10 @@ if (calculator && window.StickerSheetCalculator) {
   const totalNode = calculator.querySelector("[data-total]");
   const unitNode = calculator.querySelector("[data-unit]");
   const areaNode = calculator.querySelector("[data-area]");
+  const kindCountSummaryNode = calculator.querySelector("[data-kind-count]");
   const summaryNode = calculator.querySelector("[data-summary]");
   const selectionSummaryNode = calculator.querySelector("[data-selection-summary]");
-  const breakdownNode = calculator.querySelector("[data-breakdown]");
+  const resultCard = calculator.querySelector("[data-result-card]");
   const widthNode = calculator.querySelector("#customWidth");
   const heightNode = calculator.querySelector("#customHeight");
   const quantityNode = calculator.querySelector("#quantity");
@@ -135,10 +136,17 @@ if (calculator && window.StickerSheetCalculator) {
   const finishModes = pricingData.finishModes || {};
   const selected = { materialCategory: "paper", material: "paperSlits", print: "color1", cut: "pieceTrim", finish: "none" };
   const fallbackValues = { print: "blank", finish: "none" };
+  const finishButtons = calculator.querySelectorAll('[data-option-group="finish"] .option-pill');
 
   const roundMoney = (value) => `${Math.round(value).toLocaleString("uk-UA")} грн`;
   const formatMoney = (value) => `${value.toFixed(2).replace(".", ",")} грн`;
   const formatUnit = (value) => `${value.toFixed(2).replace(".", ",")} грн/шт`;
+  const formatSize = (width, height) => `${width}×${height} мм`;
+
+  const setResultTone = (tone) => {
+    if (!resultCard) return;
+    resultCard.dataset.tone = tone || "default";
+  };
 
   const saveOrderDraft = (draft) => {
     try {
@@ -171,21 +179,6 @@ if (calculator && window.StickerSheetCalculator) {
     selectionSummaryNode.innerHTML = parts.map((part) => `<span class="calc-selection-pill">${escapeHtml(part)}</span>`).join("");
   };
 
-  const setBreakdown = (items) => {
-    if (!breakdownNode) return;
-    breakdownNode.hidden = !items.length;
-    if (!items.length) {
-      breakdownNode.innerHTML = "";
-      return;
-    }
-    breakdownNode.innerHTML = items.map((item) => `
-      <div class="calc-breakdown-item">
-        <span>${escapeHtml(item.label)}</span>
-        <strong>${escapeHtml(item.value)}</strong>
-      </div>
-    `).join("");
-  };
-
   const setSummaryLines = (lines) => {
     if (!summaryNode) return;
     summaryNode.innerHTML = lines.map((line) => `<div>${escapeHtml(line)}</div>`).join("");
@@ -209,6 +202,26 @@ if (calculator && window.StickerSheetCalculator) {
     cut: cutModes[selected.cut] || { label: "" },
     finish: finishModes[selected.finish] || { label: "" }
   });
+
+  const syncFinishAvailability = () => {
+    const materialConfig = pricingData.materials?.[selected.material] || null;
+    const allowedFinishes = Array.isArray(materialConfig?.allowedFinishes) && materialConfig.allowedFinishes.length
+      ? new Set(materialConfig.allowedFinishes)
+      : null;
+
+    finishButtons.forEach((button) => {
+      const isAllowed = !allowedFinishes || allowedFinishes.has(button.dataset.value);
+      button.hidden = !isAllowed;
+      button.disabled = !isAllowed;
+      button.classList.toggle("active", isAllowed && button.dataset.value === selected.finish);
+    });
+
+    if (allowedFinishes && !allowedFinishes.has(selected.finish)) {
+      selected.finish = "none";
+      const fallbackButton = calculator.querySelector('[data-option-group="finish"] [data-value="none"]');
+      if (fallbackButton && !fallbackButton.hidden) fallbackButton.classList.add("active");
+    }
+  };
 
   const buildSummaryParts = ({ width, height, quantity, kindCount, labels, approximate }) => {
     const parts = [];
@@ -258,11 +271,13 @@ if (calculator && window.StickerSheetCalculator) {
         group.querySelectorAll(".option-pill").forEach((item) => item.classList.remove("active"));
         if (isSame) {
           selected.material = "";
+          syncFinishAvailability();
           calculate();
           return;
         }
         button.classList.add("active");
         selected.material = button.dataset.value;
+        syncFinishAvailability();
         calculate();
         return;
       }
@@ -282,6 +297,7 @@ if (calculator && window.StickerSheetCalculator) {
   });
 
   syncMaterialCategory();
+  syncFinishAvailability();
 
   presetButtons.forEach((button) => {
     button.addEventListener("click", () => {
@@ -305,6 +321,7 @@ if (calculator && window.StickerSheetCalculator) {
   });
 
   const calculate = () => {
+    syncFinishAvailability();
     const width = clampInputValue(widthNode, { writeBack: false });
     const height = clampInputValue(heightNode, { writeBack: false });
     const quantity = clampInputValue(quantityNode, { writeBack: false });
@@ -313,6 +330,9 @@ if (calculator && window.StickerSheetCalculator) {
     const labels = getLabels();
 
     areaNode.textContent = width && height ? `${width}×${height} мм` : "—";
+    if (kindCountSummaryNode) {
+      kindCountSummaryNode.textContent = kindCount ? `${kindCount} вид.` : "—";
+    }
 
     const baseDraft = {
       material: labels.material ? labels.material.label : "",
@@ -334,12 +354,12 @@ if (calculator && window.StickerSheetCalculator) {
     };
 
     if (!labels.material) {
+      setResultTone("default");
       setSelectionSummary(buildSummaryParts({ width, height, quantity, kindCount, labels, approximate: false }));
       saveOrderDraft(baseDraft);
       totalNode.textContent = "Оберіть матеріал для друку";
       unitNode.textContent = "—";
       materialLabel.textContent = "не вибрано";
-      setBreakdown([]);
       setSummaryLines([
         "Матеріал: не вибрано",
         labels.print.label ? `Друк: ${labels.print.label}` : "",
@@ -352,11 +372,11 @@ if (calculator && window.StickerSheetCalculator) {
     materialLabel.textContent = labels.material.label;
 
     if (!width || !height || !quantity || !kindCount) {
+      setResultTone("default");
       setSelectionSummary(buildSummaryParts({ width, height, quantity, kindCount, labels, approximate: false }));
       saveOrderDraft(baseDraft);
       totalNode.textContent = "Заповніть розміри, тираж і види";
       unitNode.textContent = "—";
-      setBreakdown([]);
       setSummaryLines([
         `Матеріал: ${labels.material.label}`,
         labels.print.label ? `Друк: ${labels.print.label}` : "",
@@ -391,17 +411,23 @@ if (calculator && window.StickerSheetCalculator) {
     }));
 
     if (!result.ok) {
+      setResultTone("warning");
       saveOrderDraft({ ...baseDraft, material: labels.material.label });
-      totalNode.textContent = result.message;
+      const isContourTooLarge = result.code === "contour-too-large" && width && height;
+      totalNode.textContent = isContourTooLarge
+        ? `Фігурна порізка недоступна для формату ${formatSize(width, height)}`
+        : result.message;
       unitNode.textContent = "—";
-      setBreakdown([]);
       setSummaryLines([
         `Матеріал: ${labels.material.label}`,
-        result.message
+        isContourTooLarge
+          ? `Для самоклеючого паперу з надсічками формат ${formatSize(width, height)} не вміщується в робочу область листа зі стандартними полями 2 мм.`
+          : result.message
       ]);
       return;
     }
 
+    setResultTone("default");
     const totalText = result.materialStatus.isApproximate ? `≈ ${roundMoney(result.total)}` : roundMoney(result.total);
     const safeUnitBase = Math.max(1, totalQuantity || quantity || 1);
     const unitText = result.materialStatus.isApproximate ? `≈ ${formatUnit(result.total / safeUnitBase)}` : formatUnit(result.total / safeUnitBase);
@@ -413,13 +439,6 @@ if (calculator && window.StickerSheetCalculator) {
 
     totalNode.textContent = totalText;
     unitNode.textContent = unitText;
-    setBreakdown([
-      { label: "Матеріал", value: roundMoney(result.materialCharge.amount) },
-      { label: "Друк", value: roundMoney(result.printCharge.amount) },
-      { label: "Порізка", value: roundMoney(result.cutCharge.amount) },
-      { label: "Покриття", value: roundMoney(result.finishCharge.amount) },
-      { label: "Разом", value: roundMoney(result.total) }
-    ]);
     setSummaryLines([
       `Матеріал: ${labels.material.label}`,
       `Профіль листа: ${result.profile.label} ${result.profile.stockWidth}×${result.profile.stockHeight} мм`,
