@@ -24,10 +24,10 @@ const applyTheme = (theme) => {
   root.style.colorScheme = theme;
   document.querySelectorAll("[data-theme-toggle]").forEach((button) => {
     const nextTheme = theme === "dark" ? "light" : "dark";
+    const labelNode = button.querySelector("[data-theme-label]");
     button.dataset.nextTheme = nextTheme;
     button.setAttribute("aria-label", theme === "dark" ? "Увімкнути світлу тему" : "Увімкнути темну тему");
-    const labelNode = button.querySelector("[data-theme-label]");
-    if (labelNode) labelNode.textContent = theme === "dark" ? "Світла" : "Темна";
+    if (labelNode) labelNode.textContent = theme === "dark" ? "Темна" : "Світла";
   });
 };
 
@@ -44,7 +44,7 @@ const createThemeToggle = () => {
   button.dataset.themeToggle = "true";
   button.innerHTML = `
     <span class="theme-toggle-icon" aria-hidden="true"></span>
-    <span class="theme-toggle-label" data-theme-label>Темна</span>
+    <span class="theme-toggle-label" data-theme-label>Тема</span>
   `;
   button.addEventListener("click", () => {
     const nextTheme = button.dataset.nextTheme || "dark";
@@ -61,8 +61,8 @@ const injectThemeToggles = () => {
   });
 };
 
-applyTheme(getPreferredTheme());
 injectThemeToggles();
+applyTheme(getPreferredTheme());
 
 if (systemThemeQuery) {
   systemThemeQuery.addEventListener("change", () => {

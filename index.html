@@ -5,6 +5,18 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>DsPrint Наклейки | Друк наклейок та етикеток у Львові</title>
   <meta name="description" content="DsPrint Наклейки друкує самоклеючі наклейки та етикетки у Львові. Папір, білі й прозорі плівки, дизайнерські матеріали, порізка та доставка по Україні.">
+  <script>
+    (() => {
+      try {
+        const storedTheme = localStorage.getItem("dsprintTheme");
+        const theme = storedTheme === "dark" || storedTheme === "light"
+          ? storedTheme
+          : (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+        document.documentElement.dataset.theme = theme;
+        document.documentElement.style.colorScheme = theme;
+      } catch {}
+    })();
+  </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
