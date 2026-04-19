@@ -767,6 +767,7 @@ const materialFilterButtons = document.querySelectorAll("[data-material-filter]"
 const materialCards = document.querySelectorAll("[data-material-card]");
 if (materialFilterButtons.length && materialCards.length) {
   const filterRow = document.querySelector("[data-material-filters]");
+  const requestedMaterialFilter = new URLSearchParams(window.location.search).get("materialFilter");
   const materialListHint = (() => {
     if (!filterRow) return null;
     const hint = document.createElement("div");
@@ -790,6 +791,7 @@ if (materialFilterButtons.length && materialCards.length) {
   };
 
   const defaultMaterialFilter =
+    Array.from(materialFilterButtons).find((button) => button.dataset.materialFilter === requestedMaterialFilter) ||
     Array.from(materialFilterButtons).find((button) => button.classList.contains("active")) ||
     materialFilterButtons[0];
 
