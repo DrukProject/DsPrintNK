@@ -101,6 +101,8 @@ window.DPI_PRICE_REFERENCE = {
   "paperSlits|297x420|color1|glossLam|trim|250": 6470,
   "paperSlits|297x420|color1|glossLam|trim|300": 7604,
   "paperSlits|297x420|color1|glossLam|trim|500": 12385,
+  "paperSlits|44x297|color1|glossLam|digitalContour|100": 700,
+  "paperSlits|44x297|color1|matteLam|digitalContour|100": 708,
   "paperSlits|297x420|color1|softTouch|pieceTrim|3": 184,
   "paperSlits|297x420|color1|softTouch|pieceTrim|1": 88,
   "paperSlits|297x420|color1|softTouch|pieceTrim|25": 945,
