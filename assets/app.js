@@ -27,7 +27,7 @@ const applyTheme = (theme) => {
     const labelNode = button.querySelector("[data-theme-label]");
     button.dataset.nextTheme = nextTheme;
     button.setAttribute("aria-label", theme === "dark" ? "Увімкнути світлу тему" : "Увімкнути темну тему");
-    if (labelNode) labelNode.textContent = theme === "dark" ? "Темна" : "Світла";
+    if (labelNode) labelNode.textContent = theme === "dark" ? "Світла" : "Темна";
   });
 };
 
