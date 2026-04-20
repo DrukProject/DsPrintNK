@@ -252,6 +252,7 @@ var(--bg);color:var(--body)}
 @media (max-width:479px){
   :root{--container:min(1160px,calc(100% - 20px))}
   .logo small{display:none}
+  .logo{font-size:16px}
   .nav-menu{left:10px;right:10px;padding:14px}
   .hero{padding:50px 0 42px}
   .hero-chip{margin-bottom:14px;padding:6px 12px;font-size:12px}
@@ -286,4 +287,51 @@ var(--bg);color:var(--body)}
   .contact-fab{right:12px}
   .fab-panel{max-width:calc(100vw - 24px)}
   .callback-form{width:min(280px,calc(100vw - 24px))}
+}
+
+@media (max-width:360px){
+  :root{--container:min(1160px,calc(100% - 16px))}
+  main{padding-top:calc(72px + env(safe-area-inset-top,0px))}
+  .site-header{padding:calc(8px + env(safe-area-inset-top,0px)) 0 8px}
+  .header-wrap{gap:8px}
+  .logo{font-size:15px}
+  .nav-toggle{width:40px;height:40px;padding:8px}
+  .hero{padding:42px 0 34px}
+  .hero-chip{padding:5px 10px;font-size:11px}
+  .hero-title{font-size:clamp(26px,12vw,34px);line-height:1}
+  .hero-sub{font-size:13px;line-height:1.45}
+  .section-title{font-size:clamp(24px,10vw,34px)}
+  .section-sub{font-size:14px}
+  .calc-hero-wrap .hero-title{font-size:clamp(24px,11vw,34px)}
+  .calc-hero-wrap .hero-sub{font-size:13px}
+  .feature-body,
+  .mosaic-info,
+  .big-card,
+  .order-form,
+  .order-section,
+  .price-lab-shell{padding:16px 14px}
+  .toolbar-box{grid-template-rows:24px auto auto;padding:12px 10px 10px}
+  .toolbar-box label{min-height:24px;font-size:12px}
+  .toolbar-inline{flex-wrap:wrap;gap:6px;min-height:auto}
+  .toolbar-inline input{width:64px;height:38px;font-size:15px}
+  .toolbar-inline span,
+  .toolbar-inline strong{font-size:14px}
+  .step-btn{width:24px;height:24px;font-size:24px}
+  .preset-row,
+  .material-categories,
+  .option-grid{display:grid;grid-template-columns:1fr;justify-items:stretch}
+  .preset-btn,
+  .option-pill,
+  .category-pill{width:100%;justify-content:center;text-align:center}
+  .material-categories .category-pill:last-child{grid-column:auto}
+  .option-help,
+  .calc-result-note,
+  .order-note{font-size:11px}
+  .calc-selection{display:grid;grid-template-columns:1fr;gap:6px}
+  .calc-selection-pill{justify-content:center;width:100%}
+  .price-inline{grid-template-columns:1fr}
+  .lightbox{padding:6px}
+  .lightbox-dialog{width:min(100vw - 8px,960px);padding:6px;border-radius:14px}
+  .contact-fab{right:10px;bottom:calc(10px + env(safe-area-inset-bottom,0px))}
+  .fab-trigger{width:52px;height:52px}
 }
