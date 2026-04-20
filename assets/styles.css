@@ -154,3 +154,130 @@ var(--bg);color:var(--body)}
 :root[data-theme="dark"] .fab-pill{border-color:#2f3c4d;background:#11161d}
 :root[data-theme="dark"] .hero{background:radial-gradient(rgba(255,255,255,.045) 1px,transparent 1px) 0 0/28px 28px,var(--bg)}
 :root[data-theme="dark"] .hero::before{background:radial-gradient(circle,rgba(255,77,0,.16) 0%,transparent 65%)}
+
+@media (max-width:1023px){
+  .section{padding:72px 0}
+  .hero{padding:64px 0 54px}
+  .hero.tight{padding:26px 0 8px}
+  .feature,
+  .order-layout{width:var(--container)}
+  .feature-body,
+  .big-card,
+  .order-form,
+  .order-section,
+  .price-lab-shell{padding:24px 20px}
+  .big-card{gap:16px}
+  .big-card a,
+  .btn-ghost{width:100%;justify-content:center}
+  .card-body,
+  .catalog-body,
+  .gallery-body,
+  .result-card,
+  .form-card{padding:20px 18px}
+  .lightbox{padding:16px}
+  .lightbox-dialog{width:min(96vw,960px);padding:12px}
+}
+
+@media (max-width:767px){
+  :root{--container:min(1160px,calc(100% - 24px))}
+  main{padding-top:calc(78px + env(safe-area-inset-top,0px))}
+  .site-header{padding:calc(10px + env(safe-area-inset-top,0px)) 0 10px}
+  .site-header.scrolled{padding:calc(8px + env(safe-area-inset-top,0px)) 0 8px}
+  .header-wrap{gap:12px}
+  .logo{font-size:17px}
+  .theme-toggle{min-height:42px;padding:10px 14px}
+  .theme-toggle-label{font-size:12px}
+  .section{padding:56px 0}
+  .section-title{margin-bottom:12px;font-size:clamp(28px,9vw,42px)}
+  .section-sub{margin-bottom:28px;font-size:15px}
+  .hero-sub{font-size:15px}
+  .calc-hero-wrap .hero-title{font-size:clamp(30px,10vw,42px)}
+  .calc-hero-wrap .hero-sub{font-size:14px;line-height:1.5}
+  .feature{width:var(--container);margin-bottom:20px;border-radius:20px}
+  .feature-body,
+  .mosaic-info,
+  .big-card,
+  .order-form,
+  .order-section,
+  .price-lab-shell{padding:20px 18px}
+  .big-card{border-radius:20px}
+  .big-card h3{font-size:clamp(22px,7vw,30px)}
+  .calc-section .container,
+  .order-layout{width:var(--container)}
+  .calc-toolbar{gap:10px}
+  .toolbar-box{padding:16px 14px 14px}
+  .toolbar-inline{gap:10px;min-height:52px}
+  .calc-toolbar>.toolbar-box:nth-child(2) .toolbar-inline{padding-left:0}
+  .toolbar-inline input{width:78px;height:42px;font-size:17px}
+  .toolbar-inline span,
+  .toolbar-inline strong{font-size:16px}
+  .step-btn{width:30px;height:30px;font-size:30px}
+  .preset-row{gap:6px}
+  .preset-btn,
+  .option-pill,
+  .category-pill{font-size:12px}
+  .option-block{padding:12px 10px}
+  .option-help{font-size:13px}
+  .calc-selection{gap:6px;margin-bottom:14px}
+  .calc-selection-pill{padding:7px 10px;font-size:11px}
+  .calc-result[data-tone="warning"] strong[data-total]{padding:16px 16px;font-size:clamp(20px,6.2vw,30px)}
+  .price-inline{gap:10px}
+  .price-inline b{font-size:14px}
+  .order-radio{padding:12px 14px}
+  .order-summary-total{min-height:72px;font-size:clamp(22px,9vw,34px)}
+  .price-lab-shell{gap:14px}
+  .price-lab-toolbar{gap:12px}
+  .price-lab-control input,
+  .price-lab-input{width:100%;max-width:none}
+  .price-lab-actions{justify-content:stretch}
+  .price-lab-actions .btn{width:100%}
+  .price-lab-table-wrap{border-radius:14px}
+  .lightbox{padding:10px}
+  .lightbox-dialog{width:min(100vw - 16px,960px);padding:10px;border-radius:20px}
+  .lightbox-image{border-radius:14px;max-height:calc(100vh - 96px)}
+  .lightbox-close{top:8px;right:8px;width:38px;height:38px}
+  .contact-fab{right:16px;bottom:calc(18px + env(safe-area-inset-bottom,0px))}
+  .fab-trigger{width:56px;height:56px}
+  .fab-trigger svg{width:24px;height:24px}
+  .footer-main{padding:38px 0}
+  .footer-grid{gap:24px}
+}
+
+@media (max-width:479px){
+  :root{--container:min(1160px,calc(100% - 20px))}
+  .logo small{display:none}
+  .nav-menu{left:10px;right:10px;padding:14px}
+  .hero{padding:50px 0 42px}
+  .hero-chip{margin-bottom:14px;padding:6px 12px;font-size:12px}
+  .hero-title{font-size:clamp(30px,11vw,40px)}
+  .hero-sub{font-size:14px}
+  .hero-actions{gap:8px}
+  .btn{min-height:48px;padding:0 18px}
+  .hero-stat strong{font-size:22px}
+  .hero-stat span{font-size:12px}
+  .feature-body,
+  .mosaic-info,
+  .big-card,
+  .order-form,
+  .order-section,
+  .price-lab-shell{padding:18px 16px}
+  .toolbar-box{padding:14px 12px 12px}
+  .toolbar-box label{font-size:13px}
+  .toolbar-inline{gap:8px}
+  .toolbar-inline input{width:72px;height:40px;font-size:16px}
+  .toolbar-inline span,
+  .toolbar-inline strong{font-size:15px}
+  .step-btn{width:28px;height:28px;font-size:28px}
+  .preset-btn{min-height:30px;padding:4px 8px;font-size:11px}
+  .option-pill,
+  .category-pill{padding:6px 9px;font-size:11px}
+  .option-help,
+  .calc-result-note,
+  .order-note{font-size:12px}
+  .calc-selection-pill{font-size:10px}
+  .lightbox{padding:8px}
+  .lightbox-dialog{width:min(100vw - 12px,960px);padding:8px;border-radius:16px}
+  .contact-fab{right:12px}
+  .fab-panel{max-width:calc(100vw - 24px)}
+  .callback-form{width:min(280px,calc(100vw - 24px))}
+}
