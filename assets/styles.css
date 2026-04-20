@@ -216,7 +216,9 @@ var(--bg);color:var(--body)}
   .calc-toolbar>.toolbar-box:first-child label,
   .calc-toolbar>.toolbar-box:nth-child(2) label{transform:none}
   .toolbar-inline{gap:10px;min-height:52px}
+  .calc-toolbar>.toolbar-box:first-child .toolbar-inline{transform:translateX(12px)}
   .calc-toolbar>.toolbar-box:nth-child(2) .toolbar-inline{padding-left:0}
+  .calc-toolbar>.toolbar-box:nth-child(2) .toolbar-inline{transform:translateX(10px)}
   .toolbar-inline input{width:78px;height:42px;font-size:17px}
   .toolbar-inline span,
   .toolbar-inline strong{font-size:16px}
