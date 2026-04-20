@@ -210,8 +210,11 @@ var(--bg);color:var(--body)}
   .big-card h3{font-size:clamp(22px,7vw,30px)}
   .calc-section .container,
   .order-layout{width:var(--container)}
-  .calc-toolbar{gap:10px}
+  .calc-toolbar{grid-template-columns:1fr;gap:10px}
+  .calc-toolbar>.toolbar-box:first-child{grid-column:auto}
   .toolbar-box{padding:16px 14px 14px}
+  .calc-toolbar>.toolbar-box:first-child label,
+  .calc-toolbar>.toolbar-box:nth-child(2) label{transform:none}
   .toolbar-inline{gap:10px;min-height:52px}
   .calc-toolbar>.toolbar-box:nth-child(2) .toolbar-inline{padding-left:0}
   .toolbar-inline input{width:78px;height:42px;font-size:17px}
@@ -224,6 +227,11 @@ var(--bg);color:var(--body)}
   .category-pill{font-size:12px}
   .option-block{padding:12px 10px}
   .option-help{font-size:13px}
+  .material-categories{grid-template-columns:1fr!important;gap:8px}
+  .material-categories .category-pill{min-height:46px;padding:12px 14px;border-radius:12px}
+  .material-categories .category-pill:last-child{grid-column:auto}
+  .material-subpanel{padding-top:10px}
+  .material-flow-indicator{margin:0 0 10px}
   .calc-selection{gap:6px;margin-bottom:14px}
   .calc-selection-pill{padding:7px 10px;font-size:11px}
   .calc-result.bottom .price-inline{display:none}
