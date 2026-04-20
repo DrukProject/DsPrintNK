@@ -178,6 +178,12 @@ var(--bg);color:var(--body)}
   .lightbox-dialog{width:min(96vw,960px);padding:12px}
 }
 
+@media (max-width:960px){
+  .calc-toolbar{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .calc-toolbar>.toolbar-box:first-child{grid-column:1/-1}
+  .calc-toolbar>.toolbar-box:nth-child(2) .toolbar-inline{padding-left:0}
+}
+
 @media (max-width:767px){
   :root{--container:min(1160px,calc(100% - 24px))}
   main{padding-top:calc(78px + env(safe-area-inset-top,0px))}
