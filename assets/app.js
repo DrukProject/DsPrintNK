@@ -409,8 +409,8 @@ if (calculator && window.StickerSheetCalculator) {
 
   const calculate = () => {
     syncFinishAvailability();
-    const width = clampInputValue(widthNode, { writeBack: false });
-    const height = clampInputValue(heightNode, { writeBack: false });
+    const width = getInputValue(widthNode);
+    const height = getInputValue(heightNode);
     const quantity = clampInputValue(quantityNode, { writeBack: false });
     const kindCount = clampInputValue(kindCountNode, { writeBack: false });
     const totalQuantity = quantity && kindCount ? quantity * kindCount : quantity;
@@ -566,7 +566,9 @@ if (calculator && window.StickerSheetCalculator) {
   [widthNode, heightNode, quantityNode, kindCountNode].forEach((item) => {
     item.addEventListener("input", calculate);
     item.addEventListener("change", () => {
-      clampInputValue(item);
+      if (item === quantityNode || item === kindCountNode) {
+        clampInputValue(item);
+      }
       calculate();
     });
   });
