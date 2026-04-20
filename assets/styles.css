@@ -226,6 +226,7 @@ var(--bg);color:var(--body)}
   .option-help{font-size:13px}
   .calc-selection{gap:6px;margin-bottom:14px}
   .calc-selection-pill{padding:7px 10px;font-size:11px}
+  .calc-result.bottom .price-inline{display:none}
   .calc-result[data-tone="warning"] strong[data-total]{padding:16px 16px;font-size:clamp(20px,6.2vw,30px)}
   .price-inline{gap:10px}
   .price-inline b{font-size:14px}
