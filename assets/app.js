@@ -862,7 +862,7 @@ const initRevealAnimations = () => {
       if (node.dataset.revealReady === "true") return;
       classes.split(" ").forEach((className) => node.classList.add(className));
       const isMobile = window.matchMedia("(max-width: 767px)").matches;
-      node.style.setProperty("--reveal-delay", `${Math.min(index * (isMobile ? 8 : 70), isMobile ? 32 : 420)}ms`);
+      node.style.setProperty("--reveal-delay", `${Math.min(index * (isMobile ? 14 : 46), isMobile ? 70 : 220)}ms`);
       node.dataset.revealReady = "true";
       nodes.push(node);
     });
@@ -883,8 +883,8 @@ const initRevealAnimations = () => {
       });
     },
     {
-      threshold: window.matchMedia("(max-width: 767px)").matches ? 0.01 : 0.14,
-      rootMargin: window.matchMedia("(max-width: 767px)").matches ? "0px 0px -12% 0px" : "0px 0px -8% 0px"
+      threshold: window.matchMedia("(max-width: 767px)").matches ? 0.02 : 0.08,
+      rootMargin: window.matchMedia("(max-width: 767px)").matches ? "0px 0px -6% 0px" : "0px 0px -4% 0px"
     }
   );
 
