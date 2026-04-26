@@ -54,16 +54,18 @@ const createThemeToggle = () => {
   return button;
 };
 
+const telegramFooterIconSrc = "https://cdn.simpleicons.org/telegram/229ED9";
+const viberFooterIconSrc = "https://cdn.simpleicons.org/viber/7360F2";
 const telegramWhiteIconSrc = "assets/icon-telegram-white.svg";
 const viberWhiteIconSrc = "assets/icon-viber-white.svg";
 
 const getFooterSocialMarkup = () => `
   <div class="footer-social">
-    <a class="social-pill social-pill--tg" href="https://t.me/dsprints" aria-label="Telegram">
-      <img src="${telegramWhiteIconSrc}" alt="Telegram">
+    <a class="social-pill" href="https://t.me/dsprints" aria-label="Telegram">
+      <img src="${telegramFooterIconSrc}" alt="Telegram">
     </a>
-    <a class="social-pill social-pill--vb" href="viber://chat?number=%2B380678003050" aria-label="Viber">
-      <img src="${viberWhiteIconSrc}" alt="Viber">
+    <a class="social-pill" href="viber://chat?number=%2B380678003050" aria-label="Viber">
+      <img src="${viberFooterIconSrc}" alt="Viber">
     </a>
   </div>
 `;
