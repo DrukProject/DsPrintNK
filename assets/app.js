@@ -768,17 +768,7 @@ if (filters.length && galleryItems.length) {
 const materialFilterButtons = document.querySelectorAll("[data-material-filter]");
 const materialCards = document.querySelectorAll("[data-material-card]");
 if (materialFilterButtons.length && materialCards.length) {
-  const filterRow = document.querySelector("[data-material-filters]");
   const requestedMaterialFilter = new URLSearchParams(window.location.search).get("materialFilter");
-  const materialListHint = (() => {
-    if (!filterRow) return null;
-    const hint = document.createElement("div");
-    hint.className = "material-hint";
-    hint.hidden = true;
-    hint.textContent = "Нижче відкрився список матеріалів.";
-    filterRow.after(hint);
-    return hint;
-  })();
 
   const applyMaterialFilter = (filter) => {
     materialFilterButtons.forEach((button) => {
@@ -789,7 +779,6 @@ if (materialFilterButtons.length && materialCards.length) {
       card.hidden = card.dataset.materialCard !== filter;
     });
 
-    if (materialListHint) materialListHint.hidden = false;
   };
 
   const defaultMaterialFilter =
