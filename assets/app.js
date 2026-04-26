@@ -54,6 +54,22 @@ const createThemeToggle = () => {
   return button;
 };
 
+const telegramFooterIconSrc = "assets/icon-telegram.svg";
+const telegramWhiteIconSrc = "assets/icon-telegram-white.svg";
+const viberFooterIconSrc = "assets/icon-viber.svg";
+const viberWhiteIconSrc = "assets/icon-viber-white.svg";
+
+const getFooterSocialMarkup = () => `
+  <div class="footer-social">
+    <a class="social-pill" href="https://t.me/dsprints" aria-label="Telegram">
+      <img src="${telegramFooterIconSrc}" alt="Telegram">
+    </a>
+    <a class="social-pill" href="viber://chat?number=%2B380678003050" aria-label="Viber">
+      <img src="${viberFooterIconSrc}" alt="Viber">
+    </a>
+  </div>
+`;
+
 const injectThemeToggles = () => {
   document.querySelectorAll(".nav-links, .nav-menu").forEach((nav) => {
     if (!nav || nav.querySelector("[data-theme-toggle]")) return;
@@ -61,8 +77,23 @@ const injectThemeToggles = () => {
   });
 };
 
+const ensureFooterSocial = () => {
+  const footerLead = document.querySelector(".footer .footer-grid > div:first-child");
+  if (!footerLead) return null;
+
+  const existingSocial = footerLead.querySelector(".footer-social");
+  if (existingSocial) {
+    existingSocial.outerHTML = getFooterSocialMarkup();
+    return footerLead.querySelector(".footer-social");
+  }
+
+  footerLead.insertAdjacentHTML("beforeend", getFooterSocialMarkup());
+  return footerLead.querySelector(".footer-social");
+};
+
 injectThemeToggles();
 applyTheme(getPreferredTheme());
+ensureFooterSocial();
 
 if (systemThemeQuery) {
   systemThemeQuery.addEventListener("change", () => {
@@ -96,11 +127,11 @@ const ensureContactFab = () => {
         Зворотний дзвінок
       </button>
       <a class="fab-pill" href="https://t.me/dsprints">
-        <span class="icon tg" aria-hidden="true"><img src="https://cdn.simpleicons.org/telegram/FFFFFF" alt=""></span>
+        <span class="icon tg" aria-hidden="true"><img src="${telegramWhiteIconSrc}" alt=""></span>
         Telegram
       </a>
       <a class="fab-pill" href="viber://chat?number=%2B380678003050">
-        <span class="icon vb" aria-hidden="true"><img src="https://cdn.simpleicons.org/viber/FFFFFF" alt=""></span>
+        <span class="icon vb" aria-hidden="true"><img src="${viberWhiteIconSrc}" alt=""></span>
         Viber
       </a>
     </div>
