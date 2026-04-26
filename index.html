@@ -22,7 +22,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="assets/styles.css?v=20260402a">
 </head>
-<body id="top">
+<body id="top" class="home-page">
   <header class="site-header" data-header>
     <div class="container header-wrap">
       <a class="logo" href="index.html"><span>Ds</span><span class="print">Print</span><small>Наклейки</small></a>
@@ -42,8 +42,22 @@
     </div>
   </header>
   <main>
-    <section class="hero">
-      <div class="container hero-wrap">
+    <section class="hero home-hero">
+      <div class="container hero-wrap home-hero-wrap">
+        <div class="hero-floating" aria-hidden="true">
+          <div class="hero-floating-card hero-floating-card-left">
+            <strong>Soft touch</strong>
+            <span>м'який преміальний дотик</span>
+          </div>
+          <div class="hero-floating-card hero-floating-card-right">
+            <strong>Контурна порізка</strong>
+            <span>наклейки по формі, а не по шаблону</span>
+          </div>
+          <div class="hero-floating-card hero-floating-card-bottom">
+            <strong>Прозора плівка</strong>
+            <span>для скла, банок і clean-look етикеток</span>
+          </div>
+        </div>
         <div class="hero-chip">DsPrint працює з 2017 року</div>
         <h1 class="hero-title">Наклейки на замовлення<br><span class="accent">Львів</span></h1>
         <p class="hero-sub">Папір, білі та прозорі плівки, дизайнерські самоклейки, порізка й оздоблення. Можемо зробити навіть від 1 штуки, а термінові замовлення часто запускаємо у той самий день.</p>
@@ -51,11 +65,34 @@
           <a class="btn btn-primary" href="calculator.html">Розрахувати ціну</a>
           <a class="btn btn-outline" href="materials.html">Дивитись каталог</a>
         </div>
+        <div class="hero-samples" aria-label="Популярні опції">
+          <span class="hero-sample-pill">самоклеючий папір</span>
+          <span class="hero-sample-pill">біла плівка</span>
+          <span class="hero-sample-pill">прозора плівка</span>
+          <span class="hero-sample-pill">дизайнерські матеріали</span>
+          <span class="hero-sample-pill">фігурна порізка</span>
+        </div>
         <div class="hero-stats">
-          <div class="hero-stat"><strong>Від 1 шт</strong><span>мінімальний тираж</span></div>
-          <div class="hero-stat hero-stat-center"><strong>1-2 дні</strong><span>+ термінове виготовлення</span></div>
-          <div class="hero-stat"><strong>До 320×480 мм</strong><span>• 330×488 мм для плівки<br>• 320×450 мм для паперу</span></div>
-          <div class="hero-stat"><strong>Нова Пошта</strong><span>доставка по Україні</span></div>
+          <div class="hero-stat">
+            <small>тираж</small>
+            <strong>Від 1 шт</strong>
+            <span>мінімальний запуск без зайвої мороки</span>
+          </div>
+          <div class="hero-stat hero-stat-center">
+            <small>швидкість</small>
+            <strong>1-2 дні</strong>
+            <span>+ термінове виготовлення в роботі того ж дня</span>
+          </div>
+          <div class="hero-stat">
+            <small>формат</small>
+            <strong>До 320×480 мм</strong>
+            <span>• 330×488 мм для плівки<br>• 320×450 мм для паперу</span>
+          </div>
+          <div class="hero-stat">
+            <small>логістика</small>
+            <strong>Нова Пошта</strong>
+            <span>доставка по Україні або самовивіз у Львові</span>
+          </div>
         </div>
       </div>
     </section>
