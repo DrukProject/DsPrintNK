@@ -924,12 +924,14 @@ const initCatalogGalleries = () => {
     });
 
     const shiftSlide = (step) => setSlide(currentIndex + step);
+    const resetGallery = () => setSlide(0);
 
     [prevButton, nextButton].forEach((button) => {
       button.addEventListener("click", (event) => {
         event.preventDefault();
         event.stopPropagation();
       });
+      button.addEventListener("pointerdown", () => setActiveGallery(wrapper));
     });
 
     prevButton.addEventListener("click", () => shiftSlide(-1));
@@ -938,6 +940,7 @@ const initCatalogGalleries = () => {
     let touchStartX = null;
     let touchStartY = null;
     imageButton.addEventListener("touchstart", (event) => {
+      setActiveGallery(wrapper);
       touchStartX = event.changedTouches[0]?.clientX ?? null;
       touchStartY = event.changedTouches[0]?.clientY ?? null;
     }, { passive: true });
@@ -957,11 +960,11 @@ const initCatalogGalleries = () => {
       if (Date.now() < suppressClickUntil) {
         event.preventDefault();
         event.stopPropagation();
+        return;
       }
+      setActiveGallery(wrapper);
     }, true);
 
-    wrapper.addEventListener("mouseenter", () => setActiveGallery(wrapper));
-    wrapper.addEventListener("mouseleave", () => clearActiveGallery(wrapper));
     wrapper.addEventListener("focusin", () => setActiveGallery(wrapper));
     wrapper.addEventListener("focusout", (event) => {
       if (wrapper.contains(event.relatedTarget)) return;
@@ -970,10 +973,26 @@ const initCatalogGalleries = () => {
     wrapper.addEventListener("catalog-gallery-step", (event) => {
       shiftSlide(event.detail?.direction || 0);
     });
+    wrapper.addEventListener("catalog-gallery-reset", resetGallery);
 
     wrapper.append(prevButton, nextButton, dots);
-    setSlide(0);
+    resetGallery();
   });
+
+  document.addEventListener("pointerdown", (event) => {
+    if (activeGalleryWrapper?.contains(event.target)) return;
+    activeGalleryWrapper = null;
+  });
+
+  const resetAllGalleries = () => {
+    galleryWrappers.forEach((wrapper) => {
+      wrapper.dispatchEvent(new CustomEvent("catalog-gallery-reset", { bubbles: false }));
+    });
+    activeGalleryWrapper = null;
+  };
+
+  window.addEventListener("load", resetAllGalleries);
+  window.addEventListener("pageshow", resetAllGalleries);
 
   window.addEventListener("keydown", (event) => {
     if (!activeGalleryWrapper) return;
