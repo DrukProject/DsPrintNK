@@ -868,8 +868,14 @@ const initCatalogGalleries = () => {
     if (!imageButton || !previewImage || slides.length < 2) return;
 
     let currentIndex = 0;
+    let suppressClickUntil = 0;
     wrapper.classList.add("has-gallery");
     wrapper.tabIndex = 0;
+
+    slides.forEach((src) => {
+      const preloadImage = new Image();
+      preloadImage.src = src;
+    });
 
     const prevButton = document.createElement("button");
     prevButton.type = "button";
@@ -930,17 +936,29 @@ const initCatalogGalleries = () => {
     nextButton.addEventListener("click", () => shiftSlide(1));
 
     let touchStartX = null;
+    let touchStartY = null;
     imageButton.addEventListener("touchstart", (event) => {
       touchStartX = event.changedTouches[0]?.clientX ?? null;
+      touchStartY = event.changedTouches[0]?.clientY ?? null;
     }, { passive: true });
     imageButton.addEventListener("touchend", (event) => {
       if (touchStartX === null) return;
       const touchEndX = event.changedTouches[0]?.clientX ?? touchStartX;
+      const touchEndY = event.changedTouches[0]?.clientY ?? touchStartY;
       const deltaX = touchEndX - touchStartX;
+      const deltaY = touchEndY - touchStartY;
       touchStartX = null;
-      if (Math.abs(deltaX) < 36) return;
+      touchStartY = null;
+      if (Math.abs(deltaX) < 36 || Math.abs(deltaX) < Math.abs(deltaY)) return;
+      suppressClickUntil = Date.now() + 420;
       shiftSlide(deltaX > 0 ? -1 : 1);
     });
+    imageButton.addEventListener("click", (event) => {
+      if (Date.now() < suppressClickUntil) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+    }, true);
 
     wrapper.addEventListener("mouseenter", () => setActiveGallery(wrapper));
     wrapper.addEventListener("mouseleave", () => clearActiveGallery(wrapper));
@@ -978,6 +996,8 @@ if (lightbox && lightboxPreview && lightboxButtons.length) {
   const lightboxDialog = lightbox.querySelector(".lightbox-dialog");
   let lightboxSlides = [];
   let lightboxIndex = 0;
+  let lightboxTouchStartX = null;
+  let lightboxTouchStartY = null;
 
   const lightboxPrev = document.createElement("button");
   lightboxPrev.type = "button";
@@ -1057,6 +1077,11 @@ if (lightbox && lightboxPreview && lightboxButtons.length) {
       alt: button.dataset.lightboxAlt || ""
     }));
 
+    lightboxSlides.forEach((slide) => {
+      const preloadImage = new Image();
+      preloadImage.src = slide.src;
+    });
+
     const currentSrc = button.dataset.lightboxImage;
     const foundIndex = lightboxSlides.findIndex((slide) => slide.src === currentSrc);
     lightboxIndex = foundIndex >= 0 ? foundIndex : 0;
@@ -1082,6 +1107,23 @@ if (lightbox && lightboxPreview && lightboxButtons.length) {
 
   lightbox.addEventListener("click", (event) => {
     if (event.target === lightbox) closeLightbox();
+  });
+
+  lightboxPreview.addEventListener("touchstart", (event) => {
+    lightboxTouchStartX = event.changedTouches[0]?.clientX ?? null;
+    lightboxTouchStartY = event.changedTouches[0]?.clientY ?? null;
+  }, { passive: true });
+
+  lightboxPreview.addEventListener("touchend", (event) => {
+    if (lightboxTouchStartX === null) return;
+    const touchEndX = event.changedTouches[0]?.clientX ?? lightboxTouchStartX;
+    const touchEndY = event.changedTouches[0]?.clientY ?? lightboxTouchStartY;
+    const deltaX = touchEndX - lightboxTouchStartX;
+    const deltaY = touchEndY - lightboxTouchStartY;
+    lightboxTouchStartX = null;
+    lightboxTouchStartY = null;
+    if (Math.abs(deltaX) < 36 || Math.abs(deltaX) < Math.abs(deltaY)) return;
+    stepLightbox(deltaX > 0 ? -1 : 1);
   });
 
   window.addEventListener("keydown", (event) => {
