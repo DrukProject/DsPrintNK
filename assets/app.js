@@ -834,6 +834,101 @@ if (materialFilterButtons.length && materialCards.length) {
   });
 }
 
+const initCatalogGalleries = () => {
+  const galleryWrappers = document.querySelectorAll("[data-gallery-images]");
+  if (!galleryWrappers.length) return;
+
+  galleryWrappers.forEach((wrapper) => {
+    const imageButton = wrapper.querySelector(".catalog-image-btn");
+    const previewImage = imageButton?.querySelector("img");
+    const slides = (wrapper.dataset.galleryImages || "")
+      .split("|")
+      .map((item) => item.trim())
+      .filter(Boolean);
+
+    if (!imageButton || !previewImage || slides.length < 2) return;
+
+    let currentIndex = 0;
+    wrapper.classList.add("has-gallery");
+
+    const prevButton = document.createElement("button");
+    prevButton.type = "button";
+    prevButton.className = "catalog-nav prev";
+    prevButton.setAttribute("aria-label", "Попереднє фото");
+    prevButton.innerHTML = `
+      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <path d="M14.7 5.3a1 1 0 0 1 0 1.4L9.41 12l5.3 5.3a1 1 0 1 1-1.42 1.4l-6-6a1 1 0 0 1 0-1.4l6-6a1 1 0 0 1 1.42 0Z" fill="currentColor"/>
+      </svg>
+    `;
+
+    const nextButton = document.createElement("button");
+    nextButton.type = "button";
+    nextButton.className = "catalog-nav next";
+    nextButton.setAttribute("aria-label", "Наступне фото");
+    nextButton.innerHTML = `
+      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <path d="M9.3 18.7a1 1 0 0 1 0-1.4l5.29-5.3-5.3-5.3a1 1 0 1 1 1.42-1.4l6 6a1 1 0 0 1 0 1.4l-6 6a1 1 0 0 1-1.42 0Z" fill="currentColor"/>
+      </svg>
+    `;
+
+    const dots = document.createElement("div");
+    dots.className = "catalog-dots";
+
+    const setSlide = (index) => {
+      currentIndex = (index + slides.length) % slides.length;
+      const currentSlide = slides[currentIndex];
+      previewImage.src = currentSlide;
+      imageButton.dataset.lightboxImage = currentSlide;
+      dots.querySelectorAll(".catalog-dot").forEach((dot, dotIndex) => {
+        dot.classList.toggle("active", dotIndex === currentIndex);
+      });
+    };
+
+    slides.forEach((_, index) => {
+      const dot = document.createElement("button");
+      dot.type = "button";
+      dot.className = "catalog-dot";
+      dot.setAttribute("aria-label", `Фото ${index + 1}`);
+      dot.addEventListener("click", (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        setSlide(index);
+      });
+      dots.append(dot);
+    });
+
+    const shiftSlide = (step) => setSlide(currentIndex + step);
+
+    [prevButton, nextButton].forEach((button) => {
+      button.addEventListener("click", (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+      });
+    });
+
+    prevButton.addEventListener("click", () => shiftSlide(-1));
+    nextButton.addEventListener("click", () => shiftSlide(1));
+
+    let touchStartX = null;
+    imageButton.addEventListener("touchstart", (event) => {
+      touchStartX = event.changedTouches[0]?.clientX ?? null;
+    }, { passive: true });
+    imageButton.addEventListener("touchend", (event) => {
+      if (touchStartX === null) return;
+      const touchEndX = event.changedTouches[0]?.clientX ?? touchStartX;
+      const deltaX = touchEndX - touchStartX;
+      touchStartX = null;
+      if (Math.abs(deltaX) < 36) return;
+      shiftSlide(deltaX > 0 ? -1 : 1);
+    });
+
+    wrapper.append(prevButton, nextButton, dots);
+    setSlide(0);
+  });
+};
+
+initCatalogGalleries();
+
 const lightbox = document.querySelector("[data-lightbox]");
 const lightboxPreview = document.querySelector("[data-lightbox-preview]");
 const lightboxClose = document.querySelector("[data-lightbox-close]");
