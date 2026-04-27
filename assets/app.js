@@ -975,9 +975,92 @@ const lightboxClose = document.querySelector("[data-lightbox-close]");
 const lightboxButtons = document.querySelectorAll("[data-lightbox-image]");
 
 if (lightbox && lightboxPreview && lightboxButtons.length) {
+  const lightboxDialog = lightbox.querySelector(".lightbox-dialog");
+  let lightboxSlides = [];
+  let lightboxIndex = 0;
+
+  const lightboxPrev = document.createElement("button");
+  lightboxPrev.type = "button";
+  lightboxPrev.className = "lightbox-nav prev";
+  lightboxPrev.setAttribute("aria-label", "Попереднє фото");
+  lightboxPrev.innerHTML = `
+    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <path d="M14.7 5.3a1 1 0 0 1 0 1.4L9.41 12l5.3 5.3a1 1 0 1 1-1.42 1.4l-6-6a1 1 0 0 1 0-1.4l6-6a1 1 0 0 1 1.42 0Z" fill="currentColor"/>
+    </svg>
+  `;
+
+  const lightboxNext = document.createElement("button");
+  lightboxNext.type = "button";
+  lightboxNext.className = "lightbox-nav next";
+  lightboxNext.setAttribute("aria-label", "Наступне фото");
+  lightboxNext.innerHTML = `
+    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <path d="M9.3 18.7a1 1 0 0 1 0-1.4l5.29-5.3-5.3-5.3a1 1 0 1 1 1.42-1.4l6 6a1 1 0 0 1 0 1.4l-6 6a1 1 0 0 1-1.42 0Z" fill="currentColor"/>
+    </svg>
+  `;
+
+  const lightboxDots = document.createElement("div");
+  lightboxDots.className = "lightbox-dots";
+
+  const renderLightboxDots = () => {
+    lightboxDots.innerHTML = "";
+    if (lightboxSlides.length < 2) return;
+    lightboxSlides.forEach((_, index) => {
+      const dot = document.createElement("button");
+      dot.type = "button";
+      dot.className = "lightbox-dot";
+      dot.setAttribute("aria-label", `Фото ${index + 1}`);
+      dot.classList.toggle("active", index === lightboxIndex);
+      dot.addEventListener("click", (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        updateLightbox(index);
+      });
+      lightboxDots.append(dot);
+    });
+  };
+
+  const updateLightbox = (index) => {
+    if (!lightboxSlides.length) return;
+    lightboxIndex = (index + lightboxSlides.length) % lightboxSlides.length;
+    const slide = lightboxSlides[lightboxIndex];
+    lightboxPreview.src = slide.src;
+    lightboxPreview.alt = slide.alt || "";
+    lightboxPrev.hidden = lightboxSlides.length < 2;
+    lightboxNext.hidden = lightboxSlides.length < 2;
+    renderLightboxDots();
+  };
+
+  const stepLightbox = (direction) => updateLightbox(lightboxIndex + direction);
+
+  lightboxDialog?.append(lightboxPrev, lightboxNext, lightboxDots);
+  lightboxPrev.addEventListener("click", (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    stepLightbox(-1);
+  });
+  lightboxNext.addEventListener("click", (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    stepLightbox(1);
+  });
+
   const openLightbox = (button) => {
-    lightboxPreview.src = button.dataset.lightboxImage;
-    lightboxPreview.alt = button.dataset.lightboxAlt || "";
+    const galleryWrapper = button.closest("[data-gallery-images]");
+    const galleryImages = (galleryWrapper?.dataset.galleryImages || button.dataset.lightboxImage || "")
+      .split("|")
+      .map((item) => item.trim())
+      .filter(Boolean);
+
+    lightboxSlides = galleryImages.map((src) => ({
+      src,
+      alt: button.dataset.lightboxAlt || ""
+    }));
+
+    const currentSrc = button.dataset.lightboxImage;
+    const foundIndex = lightboxSlides.findIndex((slide) => slide.src === currentSrc);
+    lightboxIndex = foundIndex >= 0 ? foundIndex : 0;
+    updateLightbox(lightboxIndex);
     lightbox.hidden = false;
     document.body.style.overflow = "hidden";
   };
@@ -986,6 +1069,8 @@ if (lightbox && lightboxPreview && lightboxButtons.length) {
     lightbox.hidden = true;
     lightboxPreview.src = "";
     lightboxPreview.alt = "";
+    lightboxSlides = [];
+    lightboxDots.innerHTML = "";
     document.body.style.overflow = "";
   };
 
@@ -1000,7 +1085,10 @@ if (lightbox && lightboxPreview && lightboxButtons.length) {
   });
 
   window.addEventListener("keydown", (event) => {
-    if (event.key === "Escape" && !lightbox.hidden) closeLightbox();
+    if (lightbox.hidden) return;
+    if (event.key === "Escape") closeLightbox();
+    if (event.key === "ArrowLeft") stepLightbox(-1);
+    if (event.key === "ArrowRight") stepLightbox(1);
   });
 }
 
