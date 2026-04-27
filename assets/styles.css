@@ -35,7 +35,7 @@ body:not(.materials-page) .hero-wrap:not(.calc-hero-wrap) .hero-actions{justify-
 .filter-row{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:30px}.filter-btn{padding:12px 18px;border:1.5px solid var(--line-strong);border-radius:999px;background:transparent;font-weight:700;cursor:pointer}.filter-btn.active{border-color:var(--accent);background:var(--accent);color:#fff}.gallery-item[hidden]{display:none}
 .materials-page .hero{padding:44px 0 18px}
 .materials-page .hero-wrap{display:grid;gap:10px}
-.materials-page .hero-chip{margin-bottom:0}
+.materials-page .hero-chip{margin-bottom:0;justify-self:start;align-self:start;width:auto;max-width:max-content}
 .materials-page .hero-title{margin-bottom:4px;max-width:780px;font-size:clamp(38px,5.2vw,66px);line-height:.92}
 .materials-page .hero-sub{max-width:700px;margin-bottom:0;font-size:clamp(15px,1.8vw,18px);line-height:1.45}
 .materials-page .section{padding-top:12px}
