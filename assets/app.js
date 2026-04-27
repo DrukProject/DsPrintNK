@@ -838,6 +838,25 @@ const initCatalogGalleries = () => {
   const galleryWrappers = document.querySelectorAll("[data-gallery-images]");
   if (!galleryWrappers.length) return;
 
+  let activeGalleryWrapper = null;
+
+  const setActiveGallery = (wrapper) => {
+    activeGalleryWrapper = wrapper;
+  };
+
+  const clearActiveGallery = (wrapper) => {
+    if (activeGalleryWrapper === wrapper) activeGalleryWrapper = null;
+  };
+
+  const navigateActiveGallery = (wrapper, key) => {
+    const direction = key === "ArrowLeft" ? -1 : key === "ArrowRight" ? 1 : 0;
+    if (!direction) return;
+    wrapper.dispatchEvent(new CustomEvent("catalog-gallery-step", {
+      detail: { direction },
+      bubbles: false
+    }));
+  };
+
   galleryWrappers.forEach((wrapper) => {
     const imageButton = wrapper.querySelector(".catalog-image-btn");
     const previewImage = imageButton?.querySelector("img");
@@ -850,6 +869,7 @@ const initCatalogGalleries = () => {
 
     let currentIndex = 0;
     wrapper.classList.add("has-gallery");
+    wrapper.tabIndex = 0;
 
     const prevButton = document.createElement("button");
     prevButton.type = "button";
@@ -922,8 +942,28 @@ const initCatalogGalleries = () => {
       shiftSlide(deltaX > 0 ? -1 : 1);
     });
 
+    wrapper.addEventListener("mouseenter", () => setActiveGallery(wrapper));
+    wrapper.addEventListener("mouseleave", () => clearActiveGallery(wrapper));
+    wrapper.addEventListener("focusin", () => setActiveGallery(wrapper));
+    wrapper.addEventListener("focusout", (event) => {
+      if (wrapper.contains(event.relatedTarget)) return;
+      clearActiveGallery(wrapper);
+    });
+    wrapper.addEventListener("catalog-gallery-step", (event) => {
+      shiftSlide(event.detail?.direction || 0);
+    });
+
     wrapper.append(prevButton, nextButton, dots);
     setSlide(0);
+  });
+
+  window.addEventListener("keydown", (event) => {
+    if (!activeGalleryWrapper) return;
+    if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
+    if (document.activeElement && /input|textarea|select/i.test(document.activeElement.tagName)) return;
+    if (document.querySelector("[data-lightbox]:not([hidden])")) return;
+    event.preventDefault();
+    navigateActiveGallery(activeGalleryWrapper, event.key);
   });
 };
 
