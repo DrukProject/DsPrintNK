@@ -38,6 +38,7 @@ jobs:
           cp order.html dist/
           cp gallery.html dist/
           cp price-lab.html dist/
+          cp terms.html dist/
           cp -R assets dist/assets
           cp -R photos dist/photos
 
