@@ -163,6 +163,55 @@ const escapeHtml = (value) => String(value)
 cleanupDuplicateNavLinks();
 ensureContactFab();
 
+const imageSwapTokens = new WeakMap();
+const animateImageSwap = (imageNode, nextSrc, nextAlt = null) => {
+  if (!imageNode || !nextSrc) return Promise.resolve();
+  if (imageNode.dataset.currentSrc === nextSrc || imageNode.getAttribute("src") === nextSrc) {
+    imageNode.dataset.currentSrc = nextSrc;
+    if (typeof nextAlt === "string") imageNode.alt = nextAlt;
+    return Promise.resolve();
+  }
+
+  const token = (imageSwapTokens.get(imageNode) || 0) + 1;
+  imageSwapTokens.set(imageNode, token);
+  imageNode.classList.add("is-swapping");
+
+  return new Promise((resolve) => {
+    window.setTimeout(() => {
+      if (imageSwapTokens.get(imageNode) !== token) {
+        resolve();
+        return;
+      }
+
+      const commitImage = () => {
+        if (imageSwapTokens.get(imageNode) !== token) {
+          resolve();
+          return;
+        }
+
+        imageNode.dataset.currentSrc = nextSrc;
+        if (typeof nextAlt === "string") imageNode.alt = nextAlt;
+        requestAnimationFrame(() => {
+          if (imageSwapTokens.get(imageNode) !== token) {
+            resolve();
+            return;
+          }
+          imageNode.classList.remove("is-swapping");
+          resolve();
+        });
+      };
+
+      const preloadImage = new Image();
+      preloadImage.onload = commitImage;
+      preloadImage.onerror = commitImage;
+      preloadImage.src = nextSrc;
+
+      imageNode.src = nextSrc;
+      if (preloadImage.complete) commitImage();
+    }, 110);
+  });
+};
+
 const fabToggle = document.querySelector("[data-fab-toggle]");
 const fabPanel = document.querySelector("[data-fab-panel]");
 const callbackToggle = document.querySelector("[data-callback-toggle]");
@@ -903,7 +952,7 @@ const initCatalogGalleries = () => {
     const setSlide = (index) => {
       currentIndex = (index + slides.length) % slides.length;
       const currentSlide = slides[currentIndex];
-      previewImage.src = currentSlide;
+      void animateImageSwap(previewImage, currentSlide, imageButton.dataset.lightboxAlt || previewImage.alt);
       imageButton.dataset.lightboxImage = currentSlide;
       dots.querySelectorAll(".catalog-dot").forEach((dot, dotIndex) => {
         dot.classList.toggle("active", dotIndex === currentIndex);
@@ -1063,8 +1112,7 @@ if (lightbox && lightboxPreview && lightboxButtons.length) {
     if (!lightboxSlides.length) return;
     lightboxIndex = (index + lightboxSlides.length) % lightboxSlides.length;
     const slide = lightboxSlides[lightboxIndex];
-    lightboxPreview.src = slide.src;
-    lightboxPreview.alt = slide.alt || "";
+    void animateImageSwap(lightboxPreview, slide.src, slide.alt || "");
     lightboxPrev.hidden = lightboxSlides.length < 2;
     lightboxNext.hidden = lightboxSlides.length < 2;
     renderLightboxDots();

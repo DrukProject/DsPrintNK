@@ -43,7 +43,8 @@ body:not(.materials-page) .hero-wrap:not(.calc-hero-wrap) .hero-actions{justify-
 .materials-page .catalog-grid{gap:18px}
 .catalog-media{position:relative;overflow:hidden}
 .catalog-image-btn{display:block;width:100%;padding:0;border:0;background:none;cursor:zoom-in}
-.catalog-image-btn img{display:block}
+.catalog-image-btn img{display:block;transition:opacity .32s cubic-bezier(.22,1,.36,1),transform .32s cubic-bezier(.22,1,.36,1),filter .4s ease}
+.catalog-image-btn img.is-swapping{opacity:.18;transform:scale(.985)}
 .catalog-nav{position:absolute;top:50%;z-index:2;display:grid;place-items:center;width:42px;height:42px;padding:0;border:0;border-radius:999px;background:rgba(13,17,23,.72);color:#fff;box-shadow:0 10px 30px rgba(0,0,0,.24);cursor:pointer;transform:translateY(-50%);transition:background-color .22s ease,transform .22s ease,opacity .22s ease}
 .catalog-nav:hover{background:rgba(13,17,23,.9);transform:translateY(calc(-50% - 1px))}
 .catalog-nav.prev{left:14px}
@@ -57,7 +58,8 @@ body:not(.materials-page) .hero-wrap:not(.calc-hero-wrap) .hero-actions{justify-
 .lightbox[hidden]{display:none!important}
 .lightbox{position:fixed;inset:0;z-index:120;background:rgba(10,10,10,.82);display:grid;place-items:center;padding:24px}
 .lightbox-dialog{position:relative;width:min(92vw,1080px);max-height:86vh;border-radius:28px;background:#fff;padding:14px;box-shadow:0 24px 80px rgba(0,0,0,.32)}
-.lightbox-image{display:block;width:100%;max-height:calc(86vh - 28px);object-fit:contain;border-radius:20px;background:#f4f1eb}
+.lightbox-image{display:block;width:100%;max-height:calc(86vh - 28px);object-fit:contain;border-radius:20px;background:#f4f1eb;transition:opacity .34s cubic-bezier(.22,1,.36,1),transform .34s cubic-bezier(.22,1,.36,1)}
+.lightbox-image.is-swapping{opacity:.16;transform:scale(.99)}
 .lightbox-close{position:absolute;top:10px;right:10px;z-index:2;width:42px;height:42px;border:0;border-radius:999px;background:rgba(26,26,26,.82);color:#fff;font-size:28px;line-height:1;cursor:pointer;display:grid;place-items:center}
 .lightbox-nav{position:absolute;top:50%;z-index:2;display:grid;place-items:center;width:54px;height:54px;padding:0;border:0;border-radius:999px;background:rgba(13,17,23,.64);color:#fff;box-shadow:0 16px 38px rgba(0,0,0,.24);cursor:pointer;transform:translateY(-50%);transition:background-color .22s ease,transform .22s ease}
 .lightbox-nav:hover{background:rgba(13,17,23,.9);transform:translateY(calc(-50% - 1px))}
