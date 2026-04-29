@@ -164,7 +164,12 @@ cleanupDuplicateNavLinks();
 ensureContactFab();
 
 const imageSwapTokens = new WeakMap();
-const animateImageSwap = (imageNode, nextSrc, nextAlt = null) => {
+const imageSwapClasses = ["is-swapping", "slide-out-left", "slide-out-right", "slide-in-left", "slide-in-right"];
+const resetImageSwapState = (imageNode) => {
+  imageNode.classList.remove(...imageSwapClasses);
+};
+
+const animateImageSwap = (imageNode, nextSrc, nextAlt = null, direction = 1, shouldAnimate = true) => {
   if (!imageNode || !nextSrc) return Promise.resolve();
   if (imageNode.dataset.currentSrc === nextSrc || imageNode.getAttribute("src") === nextSrc) {
     imageNode.dataset.currentSrc = nextSrc;
@@ -172,43 +177,57 @@ const animateImageSwap = (imageNode, nextSrc, nextAlt = null) => {
     return Promise.resolve();
   }
 
+  if (!shouldAnimate) {
+    resetImageSwapState(imageNode);
+    imageNode.src = nextSrc;
+    imageNode.dataset.currentSrc = nextSrc;
+    if (typeof nextAlt === "string") imageNode.alt = nextAlt;
+    return Promise.resolve();
+  }
+
   const token = (imageSwapTokens.get(imageNode) || 0) + 1;
   imageSwapTokens.set(imageNode, token);
-  imageNode.classList.add("is-swapping");
+  const outgoingClass = direction < 0 ? "slide-out-right" : "slide-out-left";
+  const incomingClass = direction < 0 ? "slide-in-left" : "slide-in-right";
+  resetImageSwapState(imageNode);
+  imageNode.classList.add("is-swapping", outgoingClass);
 
   return new Promise((resolve) => {
-    window.setTimeout(() => {
+    const preloadImage = new Image();
+    const commitImage = () => {
       if (imageSwapTokens.get(imageNode) !== token) {
         resolve();
         return;
       }
 
-      const commitImage = () => {
+      window.setTimeout(() => {
         if (imageSwapTokens.get(imageNode) !== token) {
           resolve();
           return;
         }
 
+        resetImageSwapState(imageNode);
+        imageNode.src = nextSrc;
         imageNode.dataset.currentSrc = nextSrc;
         if (typeof nextAlt === "string") imageNode.alt = nextAlt;
+        imageNode.classList.add("is-swapping", incomingClass);
         requestAnimationFrame(() => {
-          if (imageSwapTokens.get(imageNode) !== token) {
+          requestAnimationFrame(() => {
+            if (imageSwapTokens.get(imageNode) !== token) {
+              resolve();
+              return;
+            }
+            resetImageSwapState(imageNode);
             resolve();
-            return;
-          }
-          imageNode.classList.remove("is-swapping");
-          resolve();
+          });
         });
-      };
+      }, 120);
+    };
 
-      const preloadImage = new Image();
-      preloadImage.onload = commitImage;
-      preloadImage.onerror = commitImage;
-      preloadImage.src = nextSrc;
-
-      imageNode.src = nextSrc;
-      if (preloadImage.complete) commitImage();
-    }, 110);
+    preloadImage.onload = commitImage;
+    preloadImage.onerror = commitImage;
+    preloadImage.src = nextSrc;
+    if (preloadImage.complete) commitImage();
   });
 };
 
@@ -949,10 +968,10 @@ const initCatalogGalleries = () => {
     const dots = document.createElement("div");
     dots.className = "catalog-dots";
 
-    const setSlide = (index) => {
+    const setSlide = (index, direction = 1, shouldAnimate = true) => {
       currentIndex = (index + slides.length) % slides.length;
       const currentSlide = slides[currentIndex];
-      void animateImageSwap(previewImage, currentSlide, imageButton.dataset.lightboxAlt || previewImage.alt);
+      void animateImageSwap(previewImage, currentSlide, imageButton.dataset.lightboxAlt || previewImage.alt, direction, shouldAnimate);
       imageButton.dataset.lightboxImage = currentSlide;
       dots.querySelectorAll(".catalog-dot").forEach((dot, dotIndex) => {
         dot.classList.toggle("active", dotIndex === currentIndex);
@@ -967,13 +986,14 @@ const initCatalogGalleries = () => {
       dot.addEventListener("click", (event) => {
         event.preventDefault();
         event.stopPropagation();
-        setSlide(index);
+        const direction = index < currentIndex ? -1 : 1;
+        setSlide(index, direction);
       });
       dots.append(dot);
     });
 
-    const shiftSlide = (step) => setSlide(currentIndex + step);
-    const resetGallery = () => setSlide(0);
+    const shiftSlide = (step) => setSlide(currentIndex + step, step < 0 ? -1 : 1);
+    const resetGallery = () => setSlide(0, 1, false);
 
     [prevButton, nextButton].forEach((button) => {
       button.addEventListener("click", (event) => {
@@ -1102,23 +1122,24 @@ if (lightbox && lightboxPreview && lightboxButtons.length) {
       dot.addEventListener("click", (event) => {
         event.preventDefault();
         event.stopPropagation();
-        updateLightbox(index);
+        const direction = index < lightboxIndex ? -1 : 1;
+        updateLightbox(index, direction);
       });
       lightboxDots.append(dot);
     });
   };
 
-  const updateLightbox = (index) => {
+  const updateLightbox = (index, direction = 1, shouldAnimate = true) => {
     if (!lightboxSlides.length) return;
     lightboxIndex = (index + lightboxSlides.length) % lightboxSlides.length;
     const slide = lightboxSlides[lightboxIndex];
-    void animateImageSwap(lightboxPreview, slide.src, slide.alt || "");
+    void animateImageSwap(lightboxPreview, slide.src, slide.alt || "", direction, shouldAnimate);
     lightboxPrev.hidden = lightboxSlides.length < 2;
     lightboxNext.hidden = lightboxSlides.length < 2;
     renderLightboxDots();
   };
 
-  const stepLightbox = (direction) => updateLightbox(lightboxIndex + direction);
+  const stepLightbox = (direction) => updateLightbox(lightboxIndex + direction, direction < 0 ? -1 : 1);
 
   lightboxDialog?.append(lightboxPrev, lightboxNext, lightboxDots);
   lightboxPrev.addEventListener("click", (event) => {
@@ -1152,7 +1173,7 @@ if (lightbox && lightboxPreview && lightboxButtons.length) {
     const currentSrc = button.dataset.lightboxImage;
     const foundIndex = lightboxSlides.findIndex((slide) => slide.src === currentSrc);
     lightboxIndex = foundIndex >= 0 ? foundIndex : 0;
-    updateLightbox(lightboxIndex);
+    updateLightbox(lightboxIndex, 1, false);
     lightbox.hidden = false;
     document.body.style.overflow = "hidden";
   };
