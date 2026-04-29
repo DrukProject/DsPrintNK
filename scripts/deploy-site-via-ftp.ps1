@@ -136,7 +136,6 @@ $credential = New-Object System.Net.NetworkCredential($config.username, $config.
 
 $distRoot = Join-Path $env:TEMP ("dsprint-dist-" + [guid]::NewGuid().ToString("N"))
 New-Item -ItemType Directory -Path $distRoot | Out-Null
-$distRootPrefix = $distRoot.TrimEnd("\", "/") + "\"
 
 $publicFiles = @(
     "index.html",
@@ -165,19 +164,15 @@ foreach ($dir in $publicDirs) {
 try {
     Ensure-FtpDirectory -Server $config.server -Port $config.port -RemoteDir $config.remoteDir -Credential $credential -UseSsl ([bool]$config.useSsl) -Passive ([bool]$config.passive)
 
-    $allFiles = Get-ChildItem -Path $distRoot -Recurse -File
-    foreach ($file in $allFiles) {
-        if (-not $file.FullName.StartsWith($distRootPrefix, [System.StringComparison]::OrdinalIgnoreCase)) {
-            throw "Unexpected deploy path outside dist root: $($file.FullName)"
-        }
-
-        $relativePath = $file.FullName.Substring($distRootPrefix.Length)
+    $relativePaths = Get-ChildItem -Path $distRoot -Recurse -File -Name
+    foreach ($relativePath in $relativePaths) {
         $relativePath = $relativePath -replace "\\", "/"
+        $localPath = Join-Path $distRoot ($relativePath -replace "/", "\")
         $remotePath = Join-RemotePath -Base $config.remoteDir -Child $relativePath
         $remoteDir = Split-Path $remotePath -Parent
 
         Ensure-FtpDirectory -Server $config.server -Port $config.port -RemoteDir $remoteDir -Credential $credential -UseSsl ([bool]$config.useSsl) -Passive ([bool]$config.passive)
-        Publish-FtpFile -Server $config.server -Port $config.port -LocalPath $file.FullName -RemotePath $remotePath -Credential $credential -UseSsl ([bool]$config.useSsl) -Passive ([bool]$config.passive)
+        Publish-FtpFile -Server $config.server -Port $config.port -LocalPath $localPath -RemotePath $remotePath -Credential $credential -UseSsl ([bool]$config.useSsl) -Passive ([bool]$config.passive)
     }
 
     Write-Host ""
