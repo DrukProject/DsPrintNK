@@ -70,6 +70,27 @@
 
 Тобто вручну через Total Commander кожен раз уже не треба буде заливати.
 
+## Якщо хочеш взагалі без GitHub
+
+У репозиторії є локальний скрипт:
+
+`scripts/deploy-site-via-ftp.ps1`
+
+Що треба зробити:
+
+1. Скопіювати файл `deploy-ftp.local.example.json`
+2. Перейменувати його в `deploy-ftp.local.json`
+3. Вписати туди свої FTP-дані
+4. Запускати:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\deploy-site-via-ftp.ps1
+```
+
+Після цього сайт одразу заливається на хостинг напряму, без GitHub Actions.
+
+Файл `deploy-ftp.local.json` уже доданий у `.gitignore`, тому логін і пароль не поїдуть у репозиторій.
+
 ## Якщо хочеш протестувати без ризику
 
 Можна спочатку вказати тестову папку, наприклад:

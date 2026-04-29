@@ -1,0 +1,9 @@
+{
+  "server": "server6.erahosting.net",
+  "port": 21,
+  "username": "your-ftp-login",
+  "password": "your-ftp-password",
+  "remoteDir": "/public_html/",
+  "useSsl": false,
+  "passive": true
+}
