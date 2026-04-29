@@ -148,7 +148,7 @@ const ensureContactFab = () => {
 
 const cleanupDuplicateNavLinks = () => {
   document.querySelectorAll(".nav-links, .nav-menu").forEach((nav) => {
-    const materialLinks = [...nav.querySelectorAll('a[href="materials.html"]')];
+    const materialLinks = [...nav.querySelectorAll('a[href="/materials"], a[href="materials.html"]')];
     if (materialLinks.length < 2) return;
     materialLinks.slice(1).forEach((link) => link.remove());
   });
