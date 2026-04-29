@@ -1,0 +1,43 @@
+name: Deploy via FTP
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+concurrency:
+  group: "ftp-deploy"
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Prepare site artifact
+        shell: bash
+        run: |
+          mkdir -p dist
+          cp index.html dist/
+          cp calculator.html dist/
+          cp materials.html dist/
+          cp order.html dist/
+          cp gallery.html dist/
+          cp price-lab.html dist/
+          cp terms.html dist/
+          cp privacy.html dist/
+          cp -R assets dist/assets
+          cp -R photos dist/photos
+
+      - name: Deploy to FTP hosting
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.6
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          port: ${{ secrets.FTP_PORT }}
+          local-dir: ./dist/
+          server-dir: ${{ secrets.FTP_REMOTE_DIR }}
