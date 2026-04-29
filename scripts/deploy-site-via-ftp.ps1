@@ -138,6 +138,7 @@ $distRoot = Join-Path $env:TEMP ("dsprint-dist-" + [guid]::NewGuid().ToString("N
 New-Item -ItemType Directory -Path $distRoot | Out-Null
 
 $publicFiles = @(
+    ".htaccess",
     "index.html",
     "calculator.html",
     "materials.html",
