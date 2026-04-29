@@ -43,12 +43,12 @@ body:not(.materials-page) .hero-wrap:not(.calc-hero-wrap) .hero-actions{justify-
 .materials-page .catalog-grid{gap:18px}
 .catalog-media{position:relative;overflow:hidden}
 .catalog-image-btn{display:block;width:100%;padding:0;border:0;background:none;cursor:zoom-in}
-.catalog-image-btn img{display:block;transition:opacity .42s cubic-bezier(.22,1,.36,1),transform .42s cubic-bezier(.22,1,.36,1),filter .4s ease;will-change:transform,opacity}
+.catalog-image-btn img{display:block;transition:opacity .54s cubic-bezier(.23,1,.32,1),transform .54s cubic-bezier(.23,1,.32,1),filter .4s ease;will-change:transform,opacity}
 .catalog-image-btn img.is-swapping{pointer-events:none}
-.catalog-image-btn img.slide-out-left{transform:translateX(-14%) scale(.992);opacity:.62}
-.catalog-image-btn img.slide-out-right{transform:translateX(14%) scale(.992);opacity:.62}
-.catalog-image-btn img.slide-in-left{transform:translateX(-14%) scale(1.008);opacity:.78}
-.catalog-image-btn img.slide-in-right{transform:translateX(14%) scale(1.008);opacity:.78}
+.catalog-image-btn img.slide-out-left{transform:translateX(-7%) scale(.996);opacity:.86}
+.catalog-image-btn img.slide-out-right{transform:translateX(7%) scale(.996);opacity:.86}
+.catalog-image-btn img.slide-in-left{transform:translateX(-7%) scale(1.004);opacity:.9}
+.catalog-image-btn img.slide-in-right{transform:translateX(7%) scale(1.004);opacity:.9}
 .catalog-nav{position:absolute;top:50%;z-index:2;display:grid;place-items:center;width:42px;height:42px;padding:0;border:0;border-radius:999px;background:rgba(13,17,23,.72);color:#fff;box-shadow:0 10px 30px rgba(0,0,0,.24);cursor:pointer;transform:translateY(-50%);transition:background-color .22s ease,transform .22s ease,opacity .22s ease}
 .catalog-nav:hover{background:rgba(13,17,23,.9);transform:translateY(calc(-50% - 1px))}
 .catalog-nav.prev{left:14px}
@@ -62,12 +62,12 @@ body:not(.materials-page) .hero-wrap:not(.calc-hero-wrap) .hero-actions{justify-
 .lightbox[hidden]{display:none!important}
 .lightbox{position:fixed;inset:0;z-index:120;background:rgba(10,10,10,.82);display:grid;place-items:center;padding:24px}
 .lightbox-dialog{position:relative;width:min(92vw,1080px);max-height:86vh;border-radius:28px;background:#fff;padding:14px;box-shadow:0 24px 80px rgba(0,0,0,.32)}
-.lightbox-image{display:block;width:100%;max-height:calc(86vh - 28px);object-fit:contain;border-radius:20px;background:#f4f1eb;transition:opacity .46s cubic-bezier(.22,1,.36,1),transform .46s cubic-bezier(.22,1,.36,1);will-change:transform,opacity}
+.lightbox-image{display:block;width:100%;max-height:calc(86vh - 28px);object-fit:contain;border-radius:20px;background:#f4f1eb;transition:opacity .58s cubic-bezier(.23,1,.32,1),transform .58s cubic-bezier(.23,1,.32,1);will-change:transform,opacity}
 .lightbox-image.is-swapping{pointer-events:none}
-.lightbox-image.slide-out-left{transform:translateX(-10%) scale(.996);opacity:.56}
-.lightbox-image.slide-out-right{transform:translateX(10%) scale(.996);opacity:.56}
-.lightbox-image.slide-in-left{transform:translateX(-10%) scale(1.006);opacity:.82}
-.lightbox-image.slide-in-right{transform:translateX(10%) scale(1.006);opacity:.82}
+.lightbox-image.slide-out-left{transform:translateX(-5.5%) scale(.998);opacity:.88}
+.lightbox-image.slide-out-right{transform:translateX(5.5%) scale(.998);opacity:.88}
+.lightbox-image.slide-in-left{transform:translateX(-5.5%) scale(1.003);opacity:.92}
+.lightbox-image.slide-in-right{transform:translateX(5.5%) scale(1.003);opacity:.92}
 .lightbox-close{position:absolute;top:10px;right:10px;z-index:2;width:42px;height:42px;border:0;border-radius:999px;background:rgba(26,26,26,.82);color:#fff;font-size:28px;line-height:1;cursor:pointer;display:grid;place-items:center}
 .lightbox-nav{position:absolute;top:50%;z-index:2;display:grid;place-items:center;width:54px;height:54px;padding:0;border:0;border-radius:999px;background:rgba(13,17,23,.64);color:#fff;box-shadow:0 16px 38px rgba(0,0,0,.24);cursor:pointer;transform:translateY(-50%);transition:background-color .22s ease,transform .22s ease}
 .lightbox-nav:hover{background:rgba(13,17,23,.9);transform:translateY(calc(-50% - 1px))}
