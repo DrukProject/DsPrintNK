@@ -136,6 +136,7 @@ $credential = New-Object System.Net.NetworkCredential($config.username, $config.
 
 $distRoot = Join-Path $env:TEMP ("dsprint-dist-" + [guid]::NewGuid().ToString("N"))
 New-Item -ItemType Directory -Path $distRoot | Out-Null
+$distRootPrefix = $distRoot.TrimEnd("\", "/") + "\"
 
 $publicFiles = @(
     "index.html",
@@ -166,7 +167,11 @@ try {
 
     $allFiles = Get-ChildItem -Path $distRoot -Recurse -File
     foreach ($file in $allFiles) {
-        $relativePath = $file.FullName.Substring($distRoot.Length).TrimStart("\")
+        if (-not $file.FullName.StartsWith($distRootPrefix, [System.StringComparison]::OrdinalIgnoreCase)) {
+            throw "Unexpected deploy path outside dist root: $($file.FullName)"
+        }
+
+        $relativePath = $file.FullName.Substring($distRootPrefix.Length)
         $relativePath = $relativePath -replace "\\", "/"
         $remotePath = Join-RemotePath -Base $config.remoteDir -Child $relativePath
         $remoteDir = Split-Path $remotePath -Parent
